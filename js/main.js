@@ -1,4 +1,4 @@
-var map, markersGroup, activities, filteredActivities, filteringOptions, categories, dates, hours;
+var map, markersGroup, projects, filteredprojects, filteringOptions, categories, dates, hours;
 
 (function($) {
 
@@ -15,34 +15,35 @@ var map, markersGroup, activities, filteredActivities, filteringOptions, categor
 
 	$(document).ready(function() {
 		buildMap();
-		loadActivities();
+		loadprojects();
 
 		$('input#search').bind('keydown keyup keypress', function(e) {
 			filteringOptions.search = $(this).val();
-			filterActivities(filteringOptions);
+			filterprojects(filteringOptions);
 			if(e.keyCode == 13)
 				return false;
 		});
 
 		$('select#category').live('change', function() {
 			filteringOptions.category = $(this).val();
-			filterActivities(filteringOptions);
+			filterprojects(filteringOptions);
 		});
 
 		$('select#date').live('change', function() {
 			filteringOptions.date = $(this).val();
-			filterActivities(filteringOptions);
+			filterprojects(filteringOptions);
 		});
 
 		$('select#time').live('change', function() {
 			filteringOptions.hour = $(this).val();
-			filterActivities(filteringOptions);
+			filterprojects(filteringOptions);
 		});
 
-		$('.open-activity').live('click', function() {
-			var id = $(this).data('activity');
+		$('.open-project').live('click', function() {
+			alert('hi');
+			var id = $(this).data('project');
 			if(id) {
-				openActivity(id);
+				openproject(id);
 				return false;
 			}
 		});
@@ -56,66 +57,66 @@ var map, markersGroup, activities, filteredActivities, filteringOptions, categor
 		markersGroup = L.layerGroup().addTo(map);
 	}
 
-	function loadActivities() {
-		$.getJSON('activities.php', function(data) {
-			activities = filteredActivities = data;
-			buildMarkers(activities);
-			buildList(activities);
+	function loadprojects() {
+		$.getJSON('projects.php', function(data) {
+			projects = filteredprojects = data;
+			buildMarkers(projects);
+			buildList(projects);
 			populateFilters();
 		});
 	}
 
-	function filterActivities(options) {
+	function filterprojects(options) {
 		// search
-		filteredActivities = _.filter(activities, function(a) { return a.nome.toLowerCase().indexOf(options.search.toLowerCase()) != -1; });
+		filteredprojects = _.filter(projects, function(a) { return a.nome.toLowerCase().indexOf(options.search.toLowerCase()) != -1; });
 
 		// category
 		if(options.category && options.category.length) {
-			var catFilteredActivities = [];
+			var catFilteredprojects = [];
 			_.each(options.category, function(category, i) {
-				catFilteredActivities.push(_.filter(filteredActivities, function(a) { return a.cat.indexOf(category) != -1; }));
+				catFilteredprojects.push(_.filter(filteredprojects, function(a) { return a.cat.indexOf(category) != -1; }));
 			});
-			filteredActivities = _.flatten(catFilteredActivities);
+			filteredprojects = _.flatten(catFilteredprojects);
 		}
 
 		// date
 		if(options.date && options.date.length) {
-			var dateFilteredActivities = [];
+			var dateFilteredprojects = [];
 			_.each(options.date, function(date, i) {
-				dateFilteredActivities.push(_.filter(filteredActivities, function(a) { return a.data.indexOf(date) != -1; }));
+				dateFilteredprojects.push(_.filter(filteredprojects, function(a) { return a.data.indexOf(date) != -1; }));
 			});
-			filteredActivities = _.flatten(dateFilteredActivities);
+			filteredprojects = _.flatten(dateFilteredprojects);
 		}
 
 		// hour
 		if(options.hour && options.hour.length) {
-			var hourFilteredActivities = [];
+			var hourFilteredprojects = [];
 			_.each(options.hour, function(hour, i) {
-				hourFilteredActivities.push(_.filter(filteredActivities, function(a) { return a.hora.indexOf(hour) != -1; }));
+				hourFilteredprojects.push(_.filter(filteredprojects, function(a) { return a.hora.indexOf(hour) != -1; }));
 			});
-			filteredActivities = _.flatten(hourFilteredActivities);
+			filteredprojects = _.flatten(hourFilteredprojects);
 		}
 
 		// prevent duplicates
 		var unique = {};
-		_.each(filteredActivities, function(activity, i) {
-			unique[activity.id] = activity;
+		_.each(filteredprojects, function(project, i) {
+			unique[project.id] = project;
 		});
-		filteredActivities = [];
+		filteredprojects = [];
 		for(key in unique) {
-			filteredActivities.push(unique[key]);
+			filteredprojects.push(unique[key]);
 		}
 
 
-		buildMarkers(filteredActivities);
-		buildList(filteredActivities);
+		buildMarkers(filteredprojects);
+		buildList(filteredprojects);
 	}
 
-	function buildMarkers(activities) {
+	function buildMarkers(projects) {
 		markersGroup.clearLayers();
-		_.each(activities, function(activity, i) {
-			if(activity.lat && activity.lng) {
-				markersGroup.addLayer(L.marker([activity.lat, activity.lng]).bindPopup('<h2>' + activity.nome + '</h2>'));
+		_.each(projects, function(project, i) {
+			if(project.lat && project.lng) {
+				markersGroup.addLayer(L.marker([project.lat, project.lng]).bindPopup('<h2>' + project.nome + '</h2>'));
 			}
 		});
 	}
@@ -124,8 +125,8 @@ var map, markersGroup, activities, filteredActivities, filteringOptions, categor
 		/*
 		 * Categories
 		 */
-		_.each(activities, function(activity, i) {
-			var category = activity.cat;
+		_.each(projects, function(project, i) {
+			var category = project.cat;
 			if(!_.contains(categories, category))
 				categories.push(category);
 		});
@@ -135,10 +136,10 @@ var map, markersGroup, activities, filteredActivities, filteringOptions, categor
 		/*
 		 * Dates
 		 */
-		_.each(activities, function(activity, i) {
-			var activityDates = activity.data;
-			var activityDates = activityDates.split(',');
-			_.each(activityDates, function(date, i) {
+		_.each(projects, function(project, i) {
+			var projectDates = project.data;
+			var projectDates = projectDates.split(',');
+			_.each(projectDates, function(date, i) {
 				if(date) {
 					date = fixDate(date);
 					if(!_.contains(dates, date))
@@ -152,8 +153,8 @@ var map, markersGroup, activities, filteredActivities, filteringOptions, categor
 		/*
 		 * Hours
 		 */
-		_.each(activities, function(activity, i) {
-			var hour = activity.hora;
+		_.each(projects, function(project, i) {
+			var hour = project.hora;
 			if(hour) {
 				if(!_.contains(hours, hour))
 					hours.push(hour);
@@ -163,15 +164,15 @@ var map, markersGroup, activities, filteredActivities, filteringOptions, categor
 		$('#filters .time').append(_.template(template, hours));
 	}
 
-	function buildList(activities) {
-		var template = '<ul><% _.each(activities, function(activity, i) { %><li class="open-activity" data-activity="<%= activity.id %>"><p class="category"><%= activity.cat %></p><h3><%= activity.nome %></h3></li><% }); %></ul>';
-		$('#list').empty().html(_.template(template, activities));
+	function buildList(projects) {
+		var template = '<ul><% _.each(projects, function(project, i) { %><li class="open-project" data-project="<%= project.id %>"><p class="category"><%= project.cat %></p><h3><%= project.nome %></h3></li><% }); %></ul>';
+		$('#list').empty().html(_.template(template, projects));
 	}
 
-	function openActivity(activityID) {
-		var activity = _.find(activities, function(a) { return a.id == activityID; });
-		var template = '<h2><%= activity.nome %></h2>';
-		$('#activity-page').empty().show().html(_.template(template, activity));
+	function openproject(projectID) {
+		var project = _.find(projects, function(a) { return a.id == projectID; });
+		var template = '<h2><%= project.nome %></h2>';
+		$('#project-page .content').empty().show().html(_.template(template, project));
 	}
 
 	function fixDate(date) {
