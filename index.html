@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+	<meta charset="UTF-8">
+	<title>Programação | Festival BaixoCentro 2013</title>
+	<script type="text/javascript" src="lib/jquery.min.js"></script>
+	<script type="text/javascript" src="lib/leaflet.js"></script>
+	<script type="text/javascript" src="lib/leaflet.markercluster.js"></script>
+	<script type="text/javascript" src="lib/underscore-min.js"></script>
+	<script type="text/javascript" src="js/main.js?v=3"></script>
+	<link rel="stylesheet" href="css/base.css" />
+	<link rel="stylesheet" href="css/skeleton.css" />
+	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
+	<link rel="stylesheet" href="css/main.css" />
+	<link rel="stylesheet" href="lib/leaflet.css" />
+	<link rel="stylesheet" href="lib/leaflet.ie.css" />
+	<link rel="stylesheet" href="lib/MarkerCluster.Default.css" />
+	<link rel="stylesheet" href="lib/MarkerCluster.css" />
+</head>
+<body>
+	<div class="map-container">
+		<div id="map"></div>
+	</div>
+	<div id="content">
+		<div class="inner">
+			<div id="filters">
+				<h3>Filtros</h3>
+				<input type="text" placeholder="Busca" id="search" />
+				<div class="categories filter">
+					<h4>Categorias</h4>
+				</div>
+				<div class="date filter">
+					<h4>Dias</h4>
+				</div>
+				<div class="time filter">
+					<h4>Hora</h4>
+				</div>
+			</div>
+			<h3>Resultados</h3>
+			<div id="list">
+				<p class="close">Fechar</p>
+				<div class="content">
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="activity-page">
+	</div>
+</body>
+</html>
