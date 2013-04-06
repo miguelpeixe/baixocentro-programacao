@@ -40,10 +40,9 @@ var map, markersGroup, projects, filteredprojects, filteringOptions, categories,
 		});
 
 		$('.open-project').live('click', function() {
-			alert('hi');
 			var id = $(this).data('project');
 			if(id) {
-				openproject(id);
+				openProject(id);
 				return false;
 			}
 		});
@@ -169,7 +168,7 @@ var map, markersGroup, projects, filteredprojects, filteringOptions, categories,
 		$('#list').empty().html(_.template(template, projects));
 	}
 
-	function openproject(projectID) {
+	function openProject(projectID) {
 		var project = _.find(projects, function(a) { return a.id == projectID; });
 		var template = '<h2><%= project.nome %></h2>';
 		$('#project-page .content').empty().show().html(_.template(template, project));
