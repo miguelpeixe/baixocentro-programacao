@@ -254,3 +254,52 @@ h1,h2,h3,h4 {
 	float: right;
 	margin: 10px 5px;
 }
+
+
+/*
+ * Map
+ */
+
+#map .leaflet-popup-content-wrapper {
+	border-radius: 0;
+	-webkit-border-radius: 0;
+	-moz-border-radius: 0;
+}
+
+#map .leaflet-popup-content {
+	margin: 10px;
+}
+
+#map .leaflet-popup-content h2 {
+	font-size: 14px;
+	font-weight: 800;
+	line-height: 18px;
+}
+
+#map .leaflet-popup {
+	margin-bottom: 20px;
+	max-width: 200px;
+}
+
+#map .leaflet-popup:after {
+	content: '';
+	position: absolute;
+	bottom: -10px;
+	left: 50%;
+	margin-left: -10px;
+	width: 0;
+	height: 0;
+	border-left: 10px solid transparent;
+	border-right: 10px solid transparent;
+	border-top: 10px solid #fff;
+}
+
+#map .leaflet-popup-close-button,
+#map .leaflet-popup-tip-container {
+	display: none !important;
+}
+
+#map .leaflet-popup-content-wrapper,
+#map .leaflet-popup-tip {
+	border: 0;
+}

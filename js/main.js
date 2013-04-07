@@ -93,30 +93,6 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 		});
 	}
 
-	function readFragments() {
-		if(fragment.get('p')) {
-			openProject(fragment.get('p'));
-		}
-		if(fragment.get('s')) {
-			$('input#search').val(fragment.get('s')).change();
-			filteringOptions.search = fragment.get('s');
-		}
-		if(fragment.get('cat')) {
-			$('select#category').val(fragment.get('cat').split('|')).trigger('liszt:updated');
-			filteringOptions.category = fragment.get('cat').split('|');
-		}
-		if(fragment.get('date')) {
-			$('select#date').val(fragment.get('date').split('|')).trigger('liszt:updated');
-			filteringOptions.date = fragment.get('date').split('|');
-		}
-		if(fragment.get('time')) {
-			$('select#time').val(fragment.get('time').split('|')).trigger('liszt:updated');
-			filteringOptions.hour = fragment.get('time').split('|');
-		}
-
-		filterProjects(filteringOptions);
-	}
-
 	function filterProjects(options) {
 		// search
 		filteredProjects = _.filter(projects, function(a) { return a.nome.toLowerCase().indexOf(options.search.toLowerCase()) != -1; });
@@ -178,7 +154,18 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 		markersGroup.clearLayers();
 		_.each(projects, function(project, i) {
 			if(project.lat && project.lng) {
-				markersGroup.addLayer(L.marker([project.lat, project.lng]).bindPopup('<h2>' + project.nome + '</h2>'));
+				var marker = L.marker([project.lat, project.lng]).bindPopup('<h2>' + project.nome + '</h2>');
+				marker.on('mouseover', function(e) {
+					e.target.openPopup();
+				});
+				marker.on('mouseout', function(e) {
+					e.target.closePopup();
+				});
+				marker.on('click', function(e) {
+					openProject(project.id);
+					return false;
+				});
+				markersGroup.addLayer(marker);
 			}
 		});
 	}
@@ -313,5 +300,29 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 	};
 
 	var fragment = Fragment();
+
+	function readFragments() {
+		if(fragment.get('p')) {
+			openProject(fragment.get('p'));
+		}
+		if(fragment.get('s')) {
+			$('input#search').val(fragment.get('s')).change();
+			filteringOptions.search = fragment.get('s');
+		}
+		if(fragment.get('cat')) {
+			$('select#category').val(fragment.get('cat').split('|')).trigger('liszt:updated');
+			filteringOptions.category = fragment.get('cat').split('|');
+		}
+		if(fragment.get('date')) {
+			$('select#date').val(fragment.get('date').split('|')).trigger('liszt:updated');
+			filteringOptions.date = fragment.get('date').split('|');
+		}
+		if(fragment.get('time')) {
+			$('select#time').val(fragment.get('time').split('|')).trigger('liszt:updated');
+			filteringOptions.hour = fragment.get('time').split('|');
+		}
+
+		filterProjects(filteringOptions);
+	}
 
 })(jQuery);
