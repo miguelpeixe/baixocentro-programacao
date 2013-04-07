@@ -75,7 +75,9 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 	});
 
 	function buildMap() {
-		map = L.map('map').setView([-23.5369, -46.6478], 14);
+		map = L.map('map');
+		if(!fragment.get('p'))
+			map.setView([-23.5369, -46.6478], 14);
 		L.tileLayer('http://tile.stamen.com/toner/{z}/{x}/{y}.png', {
 			maxZoom: 18
 		}).addTo(map);
@@ -227,6 +229,8 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 			var template = _.template('<p class="cat"><%= project.cat %></p><h2><%= project.nome %></h2><h3><%= project.data %></h3><h3><%= project.hora %></h3><p class="local">Local: <span><%= project.local %></span></p>');
 			if(p.lat && p.lng)
 				map.setView([p.lat, p.lng], 18);
+			else
+				map.setView([-23.5369, -46.6478], 14)
 			$('#project-page .content').html(template({project: p}));
 			$('#project-page').removeClass('toggled');
 			$('#project-page').show();
@@ -235,9 +239,9 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 	}
 
 	function closeProject() {
+		fragment.rm('p');
 		$('#project-page').hide();
 		map.setView([-23.5369, -46.6478], 14);
-		fragment.rm('p');
 	}
 
 	function viewMap() {
@@ -306,9 +310,6 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 	var fragment = Fragment();
 
 	function readFragments() {
-		if(fragment.get('p')) {
-			openProject(fragment.get('p'));
-		}
 		if(fragment.get('s')) {
 			$('input#search').val(fragment.get('s')).change();
 			filteringOptions.search = fragment.get('s');
@@ -324,6 +325,9 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 		if(fragment.get('time')) {
 			$('select#time').val(fragment.get('time').split('|')).trigger('liszt:updated');
 			filteringOptions.hour = fragment.get('time').split('|');
+		}
+		if(fragment.get('p')) {
+			openProject(fragment.get('p'));
 		}
 
 		filterProjects(filteringOptions);
