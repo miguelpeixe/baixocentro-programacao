@@ -46,6 +46,17 @@ var map, markersGroup, projects, filteredprojects, filteringOptions, categories,
 				return false;
 			}
 		});
+
+		$('#project-page .close').live('click', function() {
+			closeProject();
+			return false;
+		});
+
+		$('#project-page .view-map').live('click', function() {
+			viewMap();
+			return false;
+		});
+
 	});
 
 	function buildMap() {
@@ -58,6 +69,7 @@ var map, markersGroup, projects, filteredprojects, filteringOptions, categories,
 
 	function loadprojects() {
 		$.getJSON('projects.php', function(data) {
+			map.invalidateSize(true);
 			projects = filteredprojects = data;
 			buildMarkers(projects);
 			buildList(projects);
@@ -161,17 +173,35 @@ var map, markersGroup, projects, filteredprojects, filteringOptions, categories,
 		});
 		var template = '<select id="time" data-placeholder="Horários" class="chzn-select" multiple><% _.each(hours, function(hour, i) { %><option value="<%= hour %>"><%= hour %></option><% }); %></select>';
 		$('#filters .time').append(_.template(template, hours));
+
+		$('.chzn-select').chosen();
 	}
 
-	function buildList(projects) {
-		var template = '<ul><% _.each(projects, function(project, i) { %><li class="open-project" data-project="<%= project.id %>"><p class="category"><%= project.cat %></p><h3><%= project.nome %></h3></li><% }); %></ul>';
-		$('#list').empty().html(_.template(template, projects));
+	function buildList(p) {
+		var template = _.template('<ul><% _.each(projects, function(project, i) { %><li class="open-project" data-project="<%= project.id %>"><p class="category"><%= project.cat %></p><h3><%= project.nome %></h3></li><% }); %></ul>');
+		$('#list').html(template({projects: p}));
 	}
 
 	function openProject(projectID) {
-		var project = _.find(projects, function(a) { return a.id == projectID; });
-		var template = '<h2><%= project.nome %></h2>';
-		$('#project-page .content').empty().show().html(_.template(template, project));
+		var p = _.find(projects, function(a) { return a.id == projectID; });
+		var template = _.template('<h2><%= project.nome %></h2>');
+		if(p.lat && p.lng)
+			map.setView([p.lat, p.lng], 18);
+		$('#project-page .content').html(template({project: p}));
+		$('#project-page').show();
+	}
+
+	function closeProject() {
+		$('#project-page').hide();
+		map.setView([-23.5369, -46.6478], 15);
+	}
+
+	function viewMap() {
+		var $projectPage = $('#project-page');
+		if(!$projectPage.hasClass('toggled'))
+			$('#project-page').addClass('toggled');
+		else
+			$('#project-page').removeClass('toggled');
 	}
 
 	function fixDate(date) {
