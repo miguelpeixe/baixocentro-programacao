@@ -160,7 +160,7 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 					e.target.openPopup();
 				});
 				marker.on('mouseout', function(e) {
-					e.target.closePopup();g
+					e.target.closePopup();
 				});
 				marker.on('click', function(e) {
 					openProject(project.id);

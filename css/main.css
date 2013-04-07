@@ -35,9 +35,34 @@ h1,h2,h3,h4 {
 	box-sizing(border-box);
 }
 
-.map-container {
+#header {
 	position: absolute;
 	top: 0;
+	height: 100px;
+	width: 70%;
+	background: #000;
+}
+
+#header h1 {
+	color: #fff;
+	font-weight: 800;
+	line-height: 100px;
+	margin: 0 20px;
+	float: left;
+}
+
+#header h2 {
+	font-weight: 200;
+	float: left;
+	font-size: 20px;
+	line-height: 100px;
+	color: #555;
+	text-transform: uppercase;
+}
+
+.map-container {
+	position: absolute;
+	top: 100px;
 	bottom: 0;
 	left: 0;
 	width: 70%;
@@ -190,7 +215,7 @@ h1,h2,h3,h4 {
 #project-page {
 	display: none;
 	position: absolute;
-	top: 0;
+	top: 100px;
 	bottom: 0;
 	width: 70%;
 	background: #222;
