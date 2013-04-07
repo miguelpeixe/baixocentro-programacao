@@ -75,7 +75,7 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 	});
 
 	function buildMap() {
-		map = L.map('map').setView([-23.5369, -46.6478], 15);
+		map = L.map('map').setView([-23.5369, -46.6478], 14);
 		L.tileLayer('http://tile.stamen.com/toner/{z}/{x}/{y}.png', {
 			maxZoom: 18
 		}).addTo(map);
@@ -159,7 +159,7 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 					e.target.openPopup();
 				});
 				marker.on('mouseout', function(e) {
-					e.target.closePopup();
+					e.target.closePopup();g
 				});
 				marker.on('click', function(e) {
 					openProject(project.id);
@@ -232,7 +232,7 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 
 	function closeProject() {
 		$('#project-page').hide();
-		map.setView([-23.5369, -46.6478], 15);
+		map.setView([-23.5369, -46.6478], 14);
 		fragment.rm('p');
 	}
 
