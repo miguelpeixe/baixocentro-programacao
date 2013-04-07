@@ -270,6 +270,21 @@ h1,h2,h3,h4 {
 	margin: 10px;
 }
 
+#map .leaflet-popup-content p.meta {
+	font-size: 11px;
+	margin: 0 0 5px;
+}
+
+#map .leaflet-popup-content p.meta span {
+	background: #f0f0f0;
+	padding: 3px 5px;
+	text-transform: uppercase;
+}
+
+#map .leaflet-popup-content p.meta span.cat {
+	font-weight: 800;
+}
+
 #map .leaflet-popup-content h2 {
 	font-size: 14px;
 	font-weight: 800;

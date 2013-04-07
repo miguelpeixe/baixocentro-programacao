@@ -154,7 +154,7 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 		markersGroup.clearLayers();
 		_.each(projects, function(project, i) {
 			if(project.lat && project.lng) {
-				var marker = L.marker([project.lat, project.lng]).bindPopup('<h2>' + project.nome + '</h2>');
+				var marker = L.marker([project.lat, project.lng]).bindPopup('<p class="meta"><span class="cat">' + project.cat + '</span></p><h2>' + project.nome + '</h2><p class="meta"><span class="data">' + project.data + '</span> <span class="time">' + project.hora + '</span></p>');
 				marker.on('mouseover', function(e) {
 					e.target.openPopup();
 				});
