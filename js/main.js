@@ -90,6 +90,7 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 			buildList(projects);
 			populateFilters();
 			readFragments();
+			$('#loading').hide();
 		});
 	}
 
