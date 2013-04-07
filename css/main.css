@@ -166,7 +166,7 @@ h1,h2,h3,h4 {
 	width: 70%;
 	background: #222;
 	box-sizing: border-box;
-	background: rgba(0,0,0,0.8);
+	background: rgba(0,0,0,0.85);
 	overflow: auto;
 	color: #f0f0f0;
 	transition: all .2s ease-in-out;
@@ -185,6 +185,13 @@ h1,h2,h3,h4 {
 #project-page h5 {
 	color: #fff;
 	margin: 0;
+}
+
+#project-page p.cat {
+	margin: 10px 0;
+	font-size: 11px;
+	font-weight: 800;
+	line-height: 11px;
 }
 
 #project-page h2 {
