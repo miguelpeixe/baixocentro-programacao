@@ -1,4 +1,4 @@
-var map, markersGroup, projects, filteredprojects, filteringOptions, categories, dates, hours;
+var map, markersGroup, projects, filteredProjects, filteringOptions, categories, dates, hours;
 
 (function($) {
 
@@ -17,26 +17,26 @@ var map, markersGroup, projects, filteredprojects, filteringOptions, categories,
 		buildMap();
 		loadprojects();
 
-		$('input#search').bind('keydown keyup keypress', function(e) {
+		$('input#search').bind('keydown keyup keypress', function() {
 			filteringOptions.search = $(this).val();
-			filterprojects(filteringOptions);
+			filterProjects(filteringOptions);
 			if(e.keyCode == 13)
 				return false;
 		});
 
 		$('select#category').live('change', function() {
 			filteringOptions.category = $(this).val();
-			filterprojects(filteringOptions);
+			filterProjects(filteringOptions);
 		});
 
 		$('select#date').live('change', function() {
 			filteringOptions.date = $(this).val();
-			filterprojects(filteringOptions);
+			filterProjects(filteringOptions);
 		});
 
 		$('select#time').live('change', function() {
 			filteringOptions.hour = $(this).val();
-			filterprojects(filteringOptions);
+			filterProjects(filteringOptions);
 		});
 
 		$('.open-project').live('click', function() {
@@ -57,6 +57,21 @@ var map, markersGroup, projects, filteredprojects, filteringOptions, categories,
 			return false;
 		});
 
+		$('.clear-search').live('click', function() {
+			$('input#search').val('');
+			$('select#category').val('').trigger("liszt:updated");
+			$('select#date').val('').trigger("liszt:updated");
+			$('select#time').val('').trigger("liszt:updated");
+			filteringOptions = {
+				search: '',
+				category: '',
+				date: '',
+				hour: ''
+			};
+			filterProjects(filteringOptions);
+			return false;
+		});
+
 	});
 
 	function buildMap() {
@@ -70,57 +85,93 @@ var map, markersGroup, projects, filteredprojects, filteringOptions, categories,
 	function loadprojects() {
 		$.getJSON('projects.php', function(data) {
 			map.invalidateSize(true);
-			projects = filteredprojects = data;
+			projects = filteredProjects = data;
 			buildMarkers(projects);
 			buildList(projects);
 			populateFilters();
+			readFragments();
 		});
 	}
 
-	function filterprojects(options) {
+	function readFragments() {
+		if(fragment.get('p')) {
+			openProject(fragment.get('p'));
+		}
+		if(fragment.get('s')) {
+			$('input#search').val(fragment.get('s')).change();
+			filteringOptions.search = fragment.get('s');
+		}
+		if(fragment.get('cat')) {
+			$('select#category').val(fragment.get('cat').split('|')).trigger('liszt:updated');
+			filteringOptions.category = fragment.get('cat').split('|');
+		}
+		if(fragment.get('date')) {
+			$('select#date').val(fragment.get('date').split('|')).trigger('liszt:updated');
+			filteringOptions.date = fragment.get('date').split('|');
+		}
+		if(fragment.get('time')) {
+			$('select#time').val(fragment.get('time').split('|')).trigger('liszt:updated');
+			filteringOptions.hour = fragment.get('time').split('|');
+		}
+
+		filterProjects(filteringOptions);
+	}
+
+	function filterProjects(options) {
 		// search
-		filteredprojects = _.filter(projects, function(a) { return a.nome.toLowerCase().indexOf(options.search.toLowerCase()) != -1; });
+		filteredProjects = _.filter(projects, function(a) { return a.nome.toLowerCase().indexOf(options.search.toLowerCase()) != -1; });
+
+		fragment.set({s: options.search});
 
 		// category
 		if(options.category && options.category.length) {
-			var catFilteredprojects = [];
+			var catfilteredProjects = [];
 			_.each(options.category, function(category, i) {
-				catFilteredprojects.push(_.filter(filteredprojects, function(a) { return a.cat.indexOf(category) != -1; }));
+				catfilteredProjects.push(_.filter(filteredProjects, function(a) { return a.cat.indexOf(category) != -1; }));
 			});
-			filteredprojects = _.flatten(catFilteredprojects);
+			filteredProjects = _.flatten(catfilteredProjects);
+			fragment.set({cat: options.category.join('|')});
+		} else {
+			fragment.rm('cat');
 		}
 
 		// date
 		if(options.date && options.date.length) {
-			var dateFilteredprojects = [];
+			var datefilteredProjects = [];
 			_.each(options.date, function(date, i) {
-				dateFilteredprojects.push(_.filter(filteredprojects, function(a) { return a.data.indexOf(date) != -1; }));
+				datefilteredProjects.push(_.filter(filteredProjects, function(a) { return a.data.indexOf(date) != -1; }));
 			});
-			filteredprojects = _.flatten(dateFilteredprojects);
+			filteredProjects = _.flatten(datefilteredProjects);
+			fragment.set({date: options.date.join('|')});
+		} else {
+			fragment.rm('date');
 		}
 
 		// hour
 		if(options.hour && options.hour.length) {
-			var hourFilteredprojects = [];
+			var hourfilteredProjects = [];
 			_.each(options.hour, function(hour, i) {
-				hourFilteredprojects.push(_.filter(filteredprojects, function(a) { return a.hora.indexOf(hour) != -1; }));
+				hourfilteredProjects.push(_.filter(filteredProjects, function(a) { return a.hora.indexOf(hour) != -1; }));
 			});
-			filteredprojects = _.flatten(hourFilteredprojects);
+			filteredProjects = _.flatten(hourfilteredProjects);
+			fragment.set({time: options.hour.join('|')});
+		} else {
+			fragment.rm('time');
 		}
 
 		// prevent duplicates
 		var unique = {};
-		_.each(filteredprojects, function(project, i) {
+		_.each(filteredProjects, function(project, i) {
 			unique[project.id] = project;
 		});
-		filteredprojects = [];
+		filteredProjects = [];
 		for(key in unique) {
-			filteredprojects.push(unique[key]);
+			filteredProjects.push(unique[key]);
 		}
 
 
-		buildMarkers(filteredprojects);
-		buildList(filteredprojects);
+		buildMarkers(filteredProjects);
+		buildList(filteredProjects);
 	}
 
 	function buildMarkers(projects) {
@@ -189,11 +240,13 @@ var map, markersGroup, projects, filteredprojects, filteringOptions, categories,
 			map.setView([p.lat, p.lng], 18);
 		$('#project-page .content').html(template({project: p}));
 		$('#project-page').show();
+		fragment.set({'p': p.id});
 	}
 
 	function closeProject() {
 		$('#project-page').hide();
 		map.setView([-23.5369, -46.6478], 15);
+		fragment.rm('p');
 	}
 
 	function viewMap() {
@@ -225,5 +278,40 @@ var map, markersGroup, projects, filteredprojects, filteringOptions, categories,
 
 		return date;
 	}
+
+	var Fragment = function() {
+		var f = {};
+		var _set = function(query) {
+			var hash = [];
+			_.each(query, function(v, k) {
+				hash.push(k + '=' + v);
+			});
+			document.location.hash = hash.join('&');
+		};
+		f.set = function(options) {
+			_set(_.extend(f.get(), options));
+		};
+		f.get = function(key, defaultVal) {
+			var vars = document.location.hash.substring(1).split('&');
+			var hash = {};
+			_.each(vars, function(v) {
+				var pair = v.split("=");
+				if (!pair[0] || !pair[1]) return;
+				hash[pair[0]] = unescape(pair[1]);
+				if (key && key == pair[0]) {
+					defaultVal = hash[pair[0]];
+				}
+			});
+			return key ? defaultVal : hash;
+		};
+		f.rm = function(key) {
+			var hash = f.get();
+			hash[key] && delete hash[key];
+			_set(hash);
+		};
+		return f;
+	};
+
+	var fragment = Fragment();
 
 })(jQuery);
