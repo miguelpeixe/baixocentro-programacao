@@ -184,9 +184,28 @@ h1,h2,h3,h4 {
 #project-page h4,
 #project-page h5 {
 	color: #fff;
+	margin: 0;
+}
+
+#project-page h2 {
 	font-weight: 800;
 	margin: 0;
 	width: 80%;
+}
+
+#project-page h3 {
+	font-weight: 100;
+	font-size: 20px;
+	line-height: 20px;
+}
+
+#project-page p.local {
+	font-weight: 600;
+	margin: 20px 0;
+}
+
+#project-page p.local span {
+	font-weight: 800;
 }
 
 #project-page .content {

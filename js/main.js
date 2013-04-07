@@ -184,7 +184,7 @@ var map, markersGroup, projects, filteredprojects, filteringOptions, categories,
 
 	function openProject(projectID) {
 		var p = _.find(projects, function(a) { return a.id == projectID; });
-		var template = _.template('<h2><%= project.nome %></h2>');
+		var template = _.template('<h2><%= project.nome %></h2><h3><%= project.data %></h3><h3><%= project.hora %></h3><p class="local">Local: <span><%= project.local %></span></p>');
 		if(p.lat && p.lng)
 			map.setView([p.lat, p.lng], 18);
 		$('#project-page .content').html(template({project: p}));
