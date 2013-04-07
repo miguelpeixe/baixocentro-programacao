@@ -17,7 +17,7 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 		buildMap();
 		loadprojects();
 
-		$('input#search').bind('keydown keyup keypress', function() {
+		$('input#search').bind('keydown keyup keypress', function(e) {
 			filteringOptions.search = $(this).val();
 			filterProjects(filteringOptions);
 			if(e.keyCode == 13)
