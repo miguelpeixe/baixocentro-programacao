@@ -1,163 +1,141 @@
-var map, markersGroup, projects, filteredProjects, filteringOptions, categories, dates, hours;
-
 (function($) {
 
-	filteringOptions = {
-		search: '',
-		category: '',
-		date: '',
-		hour: ''
-	};
+	var config = programacao.config;
 
-	categories = [];
-	dates = [];
-	hours = [];
+	programacao._data = {};
+	programacao.filteringVals = {};
+
+	programacao.open = function(id) {
+		var item = _.find(programacao.data, function(item) { return item.id == id; });
+		if(item) {
+			var lat = item[config.dataRef.lat];
+			var lng = item[config.dataRef.lng];
+			if(lat && lng)
+				programacao.map.setView([lat, lng], config.map.maxZoom);
+			else
+				programacao.map.setView(config.map.center, config.map.zoom)
+
+			var template = _.template(config.templates.single);
+			$('#single-page .content').html(template({item: item}));
+			$('#single-page').removeClass('toggled');
+			$('#single-page').show();
+			fragment.set({'p': item.id});
+		}
+	}
+
+	programacao.close = function() {
+		fragment.rm('p');
+		$('#single-page').hide();
+		programacao.map.setView(config.map.center, config.map.zoom);
+	}
+
+	programacao.filter = function(options) {
+
+		var filteredData = programacao.data;
+
+		if(options instanceof Object) {
+			_.each(config.filters, function(filter, i) {
+				var filtering = options[filter.name];
+				if(filtering) {
+					var fragmentData = {};
+					if(typeof filtering === 'string') {
+						filteredData = _.filter(filteredData, function(item) { return item[filter.sourceRef].toLowerCase().indexOf(filtering.toLowerCase()) != -1; });
+						fragmentData[filter.name] = filtering;
+					} else if(filtering instanceof Array) {
+						var optionsFiltered = [];
+						_.each(filtering, function(option, i) {
+							optionsFiltered.push(_.filter(filteredData, function(item) { if(item[filter.sourceRef]) return item[filter.sourceRef].indexOf(option) != -1; }));
+						});
+						filteredData = _.flatten(optionsFiltered);
+						fragmentData[filter.name] = filtering.join('|');
+					}
+					fragment.set(fragmentData);
+				} else {
+					fragment.rm(filter.name);
+				}
+			});
+		}
+
+		// prevent duplicates
+		var unique = {};
+		_.each(filteredData, function(item, i) {
+			unique[item.id] = item;
+		});
+		filteredData = [];
+		for(key in unique) {
+			filteredData.push(unique[key]);
+		}
+
+		_buildMarkers(filteredData);
+		_buildItemList(filteredData);
+	}
 
 	$(document).ready(function() {
-		buildMap();
-		loadprojects();
+		_buildMap();
+		_loadData();
 
-		$('input#search').bind('keydown keyup keypress', function(e) {
-			filteringOptions.search = $(this).val();
-			filterProjects(filteringOptions);
-			if(e.keyCode == 13)
-				return false;
-		});
-
-		$('select#category').live('change', function() {
-			filteringOptions.category = $(this).val();
-			filterProjects(filteringOptions);
-		});
-
-		$('select#date').live('change', function() {
-			filteringOptions.date = $(this).val();
-			filterProjects(filteringOptions);
-		});
-
-		$('select#time').live('change', function() {
-			filteringOptions.hour = $(this).val();
-			filterProjects(filteringOptions);
-		});
-
-		$('.open-project').live('click', function() {
-			var id = $(this).data('project');
+		$('.open-item').live('click', function() {
+			var id = $(this).data('itemid');
 			if(id) {
-				openProject(id);
+				programacao.open(id);
 				return false;
 			}
 		});
 
-		$('#project-page .close').live('click', function() {
-			closeProject();
+		$('#single-page .close').live('click', function() {
+			programacao.close();
 			return false;
 		});
 
-		$('#project-page .view-map').live('click', function() {
+		$('#single-page .view-map').live('click', function() {
 			viewMap();
 			return false;
 		});
 
 		$('.clear-search').live('click', function() {
-			$('input#search').val('');
-			$('select#category').val('').trigger("liszt:updated");
-			$('select#date').val('').trigger("liszt:updated");
-			$('select#time').val('').trigger("liszt:updated");
-			filteringOptions = {
-				search: '',
-				category: '',
-				date: '',
-				hour: ''
-			};
-			filterProjects(filteringOptions);
+			_.each(config.filters, function(filter, i) {
+				if(filter.type == 'text')
+					$('input#' + filter.name).val('');
+				else if(filter.type == 'multiple-select')
+					$('input#' + filter.name).val('').trigger('liszt:updated');
+			});
+			programacao.filter();
 			return false;
 		});
 
 	});
 
-	function buildMap() {
-		map = L.map('map');
-		if(!fragment.get('p'))
-			map.setView([-23.5369, -46.6478], 14);
-		L.tileLayer('http://tile.stamen.com/toner/{z}/{x}/{y}.png', {
-			maxZoom: 18
-		}).addTo(map);
-		markersGroup = L.layerGroup().addTo(map);
-	}
-
-	function loadprojects() {
-		$.getJSON('projects.php', function(data) {
-			map.invalidateSize(true);
-			projects = filteredProjects = data;
-			buildMarkers(projects);
-			buildList(projects);
-			populateFilters();
-			readFragments();
+	function _loadData() {
+		$.getJSON(programacao.config.dataSource, function(data) {
+			programacao.map.invalidateSize(true); //reset map size
+			programacao.data = data; // store data
+			_buildMarkers(data);
+			_buildItemList(data);
+			_buildFilters();
+			_readFragments();
 			$('#loading').hide();
 		});
 	}
 
-	function filterProjects(options) {
-		// search
-		filteredProjects = _.filter(projects, function(a) { return a.nome.toLowerCase().indexOf(options.search.toLowerCase()) != -1; });
-
-		fragment.set({s: options.search});
-
-		// category
-		if(options.category && options.category.length) {
-			var catfilteredProjects = [];
-			_.each(options.category, function(category, i) {
-				catfilteredProjects.push(_.filter(filteredProjects, function(a) { return a.cat.indexOf(category) != -1; }));
-			});
-			filteredProjects = _.flatten(catfilteredProjects);
-			fragment.set({cat: options.category.join('|')});
-		} else {
-			fragment.rm('cat');
-		}
-
-		// date
-		if(options.date && options.date.length) {
-			var datefilteredProjects = [];
-			_.each(options.date, function(date, i) {
-				datefilteredProjects.push(_.filter(filteredProjects, function(a) { return a.data.indexOf(date) != -1; }));
-			});
-			filteredProjects = _.flatten(datefilteredProjects);
-			fragment.set({date: options.date.join('|')});
-		} else {
-			fragment.rm('date');
-		}
-
-		// hour
-		if(options.hour && options.hour.length) {
-			var hourfilteredProjects = [];
-			_.each(options.hour, function(hour, i) {
-				hourfilteredProjects.push(_.filter(filteredProjects, function(a) { return a.hora.indexOf(hour) != -1; }));
-			});
-			filteredProjects = _.flatten(hourfilteredProjects);
-			fragment.set({time: options.hour.join('|')});
-		} else {
-			fragment.rm('time');
-		}
-
-		// prevent duplicates
-		var unique = {};
-		_.each(filteredProjects, function(project, i) {
-			unique[project.id] = project;
-		});
-		filteredProjects = [];
-		for(key in unique) {
-			filteredProjects.push(unique[key]);
-		}
-
-
-		buildMarkers(filteredProjects);
-		buildList(filteredProjects);
+	function _buildMap() {
+		var map = programacao.map = L.map('map');
+		if(!fragment.get('p'))
+			map.setView(config.map.center, config.map.zoom);
+		L.tileLayer(config.map.tiles, {
+			maxZoom: config.map.maxZoom
+		}).addTo(map);
+		map.markersGroup = L.layerGroup().addTo(map);
 	}
 
-	function buildMarkers(projects) {
-		markersGroup.clearLayers();
-		_.each(projects, function(project, i) {
-			if(project.lat && project.lng) {
-				var marker = L.marker([project.lat, project.lng]).bindPopup('<p class="meta"><span class="cat">' + project.cat + '</span></p><h2>' + project.nome + '</h2><p class="meta"><span class="data">' + project.data + '</span> <span class="time">' + project.hora + '</span></p>');
+	function _buildMarkers(items) {
+		var map = programacao.map;
+		map.markersGroup.clearLayers();
+		_.each(items, function(item, i) {
+			var lat = item[programacao.config.dataRef.lat];
+			var lng = item[programacao.config.dataRef.lng];
+			if(lat && lng) {
+				var template = _.template(programacao.config.templates.marker);
+				var marker = L.marker([lat, lng]).bindPopup(template({item: item}));
 				marker.on('mouseover', function(e) {
 					e.target.openPopup();
 				});
@@ -165,113 +143,77 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 					e.target.closePopup();
 				});
 				marker.on('click', function(e) {
-					openProject(project.id);
+					programacao.open(item[programacao.config.dataRef.id]);
 					return false;
 				});
-				markersGroup.addLayer(marker);
+				map.markersGroup.addLayer(marker);
 			}
 		});
 	}
 
-	function populateFilters() {
-		/*
-		 * Categories
-		 */
-		_.each(projects, function(project, i) {
-			var category = project.cat;
-			if(!_.contains(categories, category))
-				categories.push(category);
-		});
-		var template = '<select id="category" data-placeholder="Categorias" class="chzn-select" multiple><% _.each(categories, function(category, i) { %><option value="<%= category %>"><%= category %></option><% }); %></select>';
-		$('#filters .categories').append($(_.template(template, categories)));
+	function _buildFilters() {
+		var $filtersContainer = $(config.containers.filters);
+		var filters = config.filters;
+		var filtering = programacao.filteringVals;
+		var data = programacao.data;
+		_.each(filters, function(filter, i) {
 
-		/*
-		 * Dates
-		 */
-		_.each(projects, function(project, i) {
-			var projectDates = project.data;
-			var projectDates = projectDates.split(',');
-			_.each(projectDates, function(date, i) {
-				if(date) {
-					date = fixDate(date);
-					if(!_.contains(dates, date))
-						dates.push(date);
-				}
-			});
-		});
-		var template = '<select id="date" data-placeholder="Datas" class="chzn-select" multiple><% _.each(dates, function(date, i) { %><option value="<%= date %>"><%= date %></option><% }); %></select>';
-		$('#filters .date').append(_.template(template, dates));
+			$filtersContainer.append('<div class="' + filter.name + ' filter"></div>');
 
-		/*
-		 * Hours
-		 */
-		_.each(projects, function(project, i) {
-			var hour = project.hora;
-			if(hour) {
-				if(!_.contains(hours, hour))
-					hours.push(hour);
+			if(filter.type == 'text') {
+				$filtersContainer.find('.filter.' + filter.name).html('<input type="text" placeholder="' + filter.title + '" id="' + filter.name + '" />');
+
+				/* bind events */
+
+				$('input#' + filter.name).bind('keyup', function(e) {
+					filtering[filter.name] = $(this).val();
+					programacao.filter(filtering);
+					if(e.keyCode == 13)
+						return false;
+				});
+
+			} else if(filter.type == 'multiple-select') {
+
+				// populate filter
+				var filterVals = programacao._data[filter.name] = [];
+				_.each(data, function(item, i) {
+					var filterVal = item[filter.sourceRef];
+					if(filter.name == 'date' || filter.name == 'time') {
+						filterVal = filterVal.split(',');
+						_.each(filterVal, function(v, i) {
+							if(!_.contains(filterVals, v))
+								filterVals.push(v);
+						});
+					} else {
+						if(!_.contains(filterVals, filterVal))
+							filterVals.push(filterVal);
+					}
+				});
+				var template = _.template('<select id="' + filter.name + '" data-placeholder="' + filter.title + '" class="chzn-select" multiple><% _.each(vals, function(val, i) { %><option value="<%= val %>"><%= val %></option><% }); %></select>');
+				$filtersContainer.find('.filter.' + filter.name).html(template({vals: filterVals}));
+
+				/* bind events */
+
+				$('select#' + filter.name).live('change', function() {
+					filtering[filter.name] = $(this).val();
+					programacao.filter(filtering);
+				});
 			}
 		});
-		var template = '<select id="time" data-placeholder="Horários" class="chzn-select" multiple><% _.each(hours, function(hour, i) { %><option value="<%= hour %>"><%= hour %></option><% }); %></select>';
-		$('#filters .time').append(_.template(template, hours));
-
 		$('.chzn-select').chosen();
 	}
 
-	function buildList(p) {
-		var template = _.template('<ul><% _.each(projects, function(project, i) { %><li class="open-project" data-project="<%= project.id %>"><p class="category"><%= project.cat %></p><h3><%= project.nome %></h3></li><% }); %></ul>');
-		$('#list').html(template({projects: p}));
-	}
-
-	function openProject(projectID) {
-		var p = _.find(projects, function(a) { return a.id == projectID; });
-		if(p) {
-			var template = _.template('<p class="cat"><%= project.cat %></p><h2><%= project.nome %></h2><h3><%= project.data %></h3><h3><%= project.hora %></h3><p class="local">Local: <span><%= project.local %></span></p>');
-			if(p.lat && p.lng)
-				map.setView([p.lat, p.lng], 18);
-			else
-				map.setView([-23.5369, -46.6478], 14)
-			$('#project-page .content').html(template({project: p}));
-			$('#project-page').removeClass('toggled');
-			$('#project-page').show();
-			fragment.set({'p': p.id});
-		}
-	}
-
-	function closeProject() {
-		fragment.rm('p');
-		$('#project-page').hide();
-		map.setView([-23.5369, -46.6478], 14);
+	function _buildItemList(items) {
+		var template = _.template('<ul><% _.each(items, function(item, i) { %><li class="open-item" data-itemid="<%= item.id %>">' + config.templates.list + '</li><% }); %></ul>');
+		$('#list').html(template({items: items}));
 	}
 
 	function viewMap() {
-		var $projectPage = $('#project-page');
-		if(!$projectPage.hasClass('toggled'))
-			$('#project-page').addClass('toggled');
+		var $page = $('#single-page');
+		if(!$page.hasClass('toggled'))
+			$('#single-page').addClass('toggled');
 		else
-			$('#project-page').removeClass('toggled');
-	}
-
-	function fixDate(date) {
-
-		// clear years (and buggy years)
-		date = date.replace('/2013', '');
-		date = date.replace('/2012/2013', '');
-		date = date.replace('/2018', '');
-		date = date.replace('/2024', '');
-		date = date.replace('/2012', '');
-
-		// add 0 prefix to 1 length day/month
-		var separatedVals = date.split('/');
-		if(separatedVals) {
-			if(separatedVals[0].length === 1)
-				separatedVals[0] = '0' + separatedVals[0];
-			if(separatedVals[1].length === 1)
-				separatedVals[1] = '0' + separatedVals[1];
-			date = separatedVals.join('/');
-		}
-
-		return date;
+			$('#single-page').removeClass('toggled');
 	}
 
 	var Fragment = function() {
@@ -307,30 +249,32 @@ var map, markersGroup, projects, filteredProjects, filteringOptions, categories,
 		return f;
 	};
 
-	var fragment = Fragment();
+	function _readFragments() {
 
-	function readFragments() {
-		if(fragment.get('s')) {
-			$('input#search').val(fragment.get('s')).change();
-			filteringOptions.search = fragment.get('s');
-		}
-		if(fragment.get('cat')) {
-			$('select#category').val(fragment.get('cat').split('|')).trigger('liszt:updated');
-			filteringOptions.category = fragment.get('cat').split('|');
-		}
-		if(fragment.get('date')) {
-			$('select#date').val(fragment.get('date').split('|')).trigger('liszt:updated');
-			filteringOptions.date = fragment.get('date').split('|');
-		}
-		if(fragment.get('time')) {
-			$('select#time').val(fragment.get('time').split('|')).trigger('liszt:updated');
-			filteringOptions.hour = fragment.get('time').split('|');
-		}
+		var filtering = programacao.filteringVals;
+
+		_.each(config.filters, function(filter, i) {
+			if(fragment.get(filter.name)) {
+				var val = fragment.get(filter.name);
+				if(val.indexOf('|') != -1)
+					val = val.split('|');
+
+				var $input = $('.filter #' + filter.name);
+
+				$input.val(val);
+				if($input.is('select'))
+					$input.trigger('liszt:updated');
+
+				filtering[filter.name] = val;
+			}
+		});
 		if(fragment.get('p')) {
-			openProject(fragment.get('p'));
+			programacao.open(fragment.get('p'));
 		}
 
-		filterProjects(filteringOptions);
+		programacao.filter(filtering);
 	}
+
+	var fragment = Fragment();
 
 })(jQuery);

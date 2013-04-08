@@ -155,6 +155,8 @@ h1,h2,h3,h4 {
 
 #content #filters .chzn-container {
 	margin-bottom: 10px !important;
+	width: 100% !important;
+	height: 38px !important;
 }
 
 #content #filters .search-field input {
@@ -198,7 +200,7 @@ h1,h2,h3,h4 {
 
 #content #list {
 	position: absolute;
-	top: 300px;
+	top: 325px;
 	overflow: auto;
 	bottom: 0;
 	left: 20px;
@@ -239,7 +241,7 @@ h1,h2,h3,h4 {
 	padding: 0;
 }
 
-#project-page {
+#single-page {
 	display: none;
 	position: absolute;
 	top: 100px;
@@ -255,7 +257,7 @@ h1,h2,h3,h4 {
 	-moz-transition: all .2s ease-in-out;
 }
 
-#project-page .content {
+#single-page .content {
 	overflow: auto;
 	top: 15%;
 	bottom: 15%;
@@ -265,48 +267,48 @@ h1,h2,h3,h4 {
 	padding-right: 20px;
 }
 
-#project-page.toggled {
+#single-page.toggled {
 	top: 80%;
 }
 
-#project-page h1,
-#project-page h2,
-#project-page h3,
-#project-page h4,
-#project-page h5 {
+#single-page h1,
+#single-page h2,
+#single-page h3,
+#single-page h4,
+#single-page h5 {
 	color: #fff;
 	margin: 0;
 }
 
-#project-page p.cat {
+#single-page p.cat {
 	margin: 10px 0;
 	font-size: 11px;
 	font-weight: 800;
 	line-height: 11px;
 }
 
-#project-page h2 {
+#single-page h2 {
 	font-weight: 800;
 	margin: 0;
 	width: 80%;
 }
 
-#project-page h3 {
+#single-page h3 {
 	font-weight: 100;
 	font-size: 20px;
 	line-height: 20px;
 }
 
-#project-page p.local {
+#single-page p.local {
 	font-weight: 600;
 	margin: 20px 0;
 }
 
-#project-page p.local span {
+#single-page p.local span {
 	font-weight: 800;
 }
 
-#project-page .actions {
+#single-page .actions {
 	position: absolute;
 	top:15%;
 	right: 20%;
@@ -319,7 +321,7 @@ h1,h2,h3,h4 {
 	width: 20%;
 }
 
-#project-page .actions p {
+#single-page .actions p {
 	float: right;
 	margin: 10px 5px;
 }

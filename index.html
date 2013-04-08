@@ -8,7 +8,8 @@
 	<script type="text/javascript" src="lib/leaflet.markercluster.js"></script>
 	<script type="text/javascript" src="lib/underscore-min.js"></script>
 	<script type="text/javascript" src="lib/chosen.jquery.min.js"></script>
-	<script type="text/javascript" src="js/main.js?v=5"></script>
+	<script type="text/javascript" src="config.js"></script>
+	<script type="text/javascript" src="js/main.js?v=13"></script>
 	<link rel="stylesheet" href="css/base.css" />
 	<link rel="stylesheet" href="css/skeleton.css" />
 	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
@@ -37,12 +38,7 @@
 			<div id="filters" class="clearfix">
 				<p class="clear-search">Limpar busca</p>
 				<h3>Filtros</h3>
-				<input type="text" placeholder="Busca por nome" id="search" />
-				<div class="categories filter">
-				</div>
-				<div class="date filter">
-				</div>
-				<div class="time filter">
+				<div class="filters-container">
 				</div>
 			</div>
 			<h3>Resultados</h3>
@@ -50,7 +46,7 @@
 			</div>
 		</div>
 	</div>
-	<div id="project-page">
+	<div id="single-page">
 		<div class="actions">
 			<p class="close">Fechar</p>
 			<p class="view-map">Ver mapa</p>
