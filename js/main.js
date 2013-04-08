@@ -13,7 +13,7 @@
 
 	app.openItem = function(id) {
 
-		fragment.set({'p': item.id});
+		fragment.set({'p': id});
 	
 		$('#single-page .content').empty();
 		$('#single-page').removeClass('toggled');
