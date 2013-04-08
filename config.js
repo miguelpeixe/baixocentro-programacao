@@ -23,6 +23,39 @@ config.map = {
 }
 
 /*
+ * Map markers settings
+ */
+config.map.markers = {
+	type: 'random',
+	icons: [
+		{
+			iconUrl: 'icons/blue.png',
+			iconSize: [32,32],
+			iconAnchor: [16,16],
+			popupAnchor: [0,-5]
+		},
+		{
+			iconUrl: 'icons/pink.png',
+			iconSize: [32,32],
+			iconAnchor: [16,16],
+			popupAnchor: [0,-5]
+		},
+		{
+			iconUrl: 'icons/yellow.png',
+			iconSize: [32,32],
+			iconAnchor: [16,16],
+			popupAnchor: [0,-5]
+		},
+		{
+			iconUrl: 'icons/green.png',
+			iconSize: [32,32],
+			iconAnchor: [16,16],
+			popupAnchor: [0,-5]
+		}
+	]
+};
+
+/*
  * Item data source
  *
  * Data to load when viewing single item section
@@ -92,8 +125,7 @@ config.filters = [
 config.templates = {
 	list: '<p class="category"><%= item.cat %></p><h3><%= item.nome %></h3>',
 	single: '<p class="cat"><%= item.cat %></p><h2><%= item.nome %></h2><h3><%= item.data %></h3><h3><%= item.hora %></h3><p class="local">Local: <span><%= item.local %></span></p><p><%= item.desc %></p>',
-	marker: '<p class="meta"><span class="cat"><%= item.cat %></span></p><h2><%= item.nome %></h2><p class="meta"><span class="data"><%= item.data %></span> <span class="time"><%= item.hora %></span></p>',
-	icons: ['pink', 'green', 'blue', 'yellow']
+	marker: '<p class="meta"><span class="cat"><%= item.cat %></span></p><h2><%= item.nome %></h2><p class="meta"><span class="data"><%= item.data %></span> <span class="time"><%= item.hora %></span></p>'
 };
 
 /*

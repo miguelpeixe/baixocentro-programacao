@@ -122,33 +122,12 @@
 			app.$.append($loading);
 			app.$.append($header);
 
-			if(config.map)
-				_map();
 			if(config.dataSource)
 				_data();
+			if(config.map)
+				_map();
 
 		});
-	}
-
-	var _map = function() {
-		var $map = $('<div class="map-container"><div id="map"></div></div>');
-		app.$.append($map);
-		var map = app.map = L.map('map');
-		if(!fragment.get('p'))
-			map.setView(config.map.center, config.map.zoom);
-		L.tileLayer(config.map.tiles, {
-			maxZoom: config.map.maxZoom
-		}).addTo(map);
-		map.markersGroup = L.layerGroup().addTo(map);
-		
-		//adding template icons
-		if(config.templates.icons) {
-			var LeafIcon = L.Icon.extend({});
-			config.templates.icons_ready = {}
-			$.each(config.templates.icons, function(index, icon){
-				config.templates.icons_ready[icon] = new LeafIcon({iconUrl: 'icons/'+icon+'.png'});
-			});
-		}
 	}
 
 	var _data = function() {
@@ -167,6 +146,27 @@
 		});
 	}
 
+	var _map = function() {
+		var $map = $('<div class="map-container"><div id="map"></div></div>');
+		app.$.append($map);
+		var map = app.map = L.map('map');
+		if(!fragment.get('p'))
+			map.setView(config.map.center, config.map.zoom);
+		L.tileLayer(config.map.tiles, {
+			maxZoom: config.map.maxZoom
+		}).addTo(map);
+		map.markersGroup = L.layerGroup().addTo(map);
+		
+		// create and store marker icons
+		if(config.map.markers && config.map.markers.icons.length) {
+			app._data.icons = [];
+			var LeafIcon = L.Icon.extend({});
+			_.each(config.map.markers.icons, function(icon, i) {
+				app._data.icons.push(new LeafIcon(icon));
+			});
+		}
+	}
+
 	var _markers = function(items) {
 		var map = app.map;
 		map.markersGroup.clearLayers();
@@ -174,11 +174,18 @@
 			var lat = item[config.dataRef.lat];
 			var lng = item[config.dataRef.lng];
 			if(lat && lng) {
-				//hackish way of randomize icons
-				var i = config.templates.icons.sort( function() { return 0.5 - Math.random() })[0];
-				var icon = config.templates.icons_ready[i];
+				var options = {};
+				// mouseover template
 				var template = _.template(config.templates.marker);
-				var marker = L.marker([lat, lng], {icon: icon}).bindPopup(template({item: item}));
+				// marker icon
+				if(app._data.icons && app._data.icons.length) {
+					var icons = app._data.icons;
+					if(config.map.markers.type == 'random') {
+						options.icon = icons[_.random(0, icons.length-1)];
+					}
+				}
+				// create
+				var marker = L.marker([lat, lng], options).bindPopup(template({item: item}));
 				marker.on('mouseover', function(e) {
 					e.target.openPopup();
 				});
