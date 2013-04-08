@@ -41,6 +41,22 @@
 				display(item);
 			}
 		}
+
+		var display = function(item) {
+			var template = _.template(config.templates.single);
+			$('#single-page .content').html(template({item: item}));
+			$('#single-page').removeClass('toggled');
+			fragment.set({'p': item.id});
+		}
+
+		var viewMap = function() {
+			var $page = $('#single-page');
+			if(!$page.hasClass('toggled'))
+				$('#single-page').addClass('toggled');
+			else
+				$('#single-page').removeClass('toggled');
+		}
+		
 		$('#single-page .close').click(function() {
 			app.closeItem();
 			return false;
@@ -50,21 +66,6 @@
 			viewMap();
 			return false;
 		});
-
-		function display(item) {
-			var template = _.template(config.templates.single);
-			$('#single-page .content').html(template({item: item}));
-			$('#single-page').removeClass('toggled');
-			fragment.set({'p': item.id});
-		}
-
-		function viewMap() {
-			var $page = $('#single-page');
-			if(!$page.hasClass('toggled'))
-				$('#single-page').addClass('toggled');
-			else
-				$('#single-page').removeClass('toggled');
-		}
 
 	}
 
