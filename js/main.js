@@ -256,6 +256,8 @@
 						var filterVal = item[filter.sourceRef];
 						if(filter.split) {
 							filterVal = filterVal.split(filter.split);
+						}
+						if(filterVal instanceof Array) {
 							_.each(filterVal, function(v, i) {
 								filterVals = _storeFilter(filterVals, v, filter);
 							});
