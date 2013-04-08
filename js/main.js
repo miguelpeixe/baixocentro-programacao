@@ -155,7 +155,8 @@
 		L.tileLayer(config.map.tiles, {
 			maxZoom: config.map.maxZoom
 		}).addTo(map);
-		map.markersGroup = L.layerGroup().addTo(map);
+		map.markersGroup = new L.MarkerClusterGroup()
+		map.markersGroup.addTo(map);
 		
 		// create and store marker icons
 		if(config.map.markers && config.map.markers.icons.length) {
