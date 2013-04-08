@@ -14,10 +14,12 @@
 	app.openItem = function(id) {
 
 		fragment.set({'p': id});
-	
-		$('#single-page .content').empty();
-		$('#single-page').removeClass('toggled');
-		$('#single-page').show();
+
+		var $page = $('#single-page');
+
+		$page.find('.content').empty();
+		$page.removeClass('toggled');
+		$page.show();
 
 		var item = _.find(app.data, function(item) { return item.id == id; });
 		if(item) {
@@ -33,7 +35,7 @@
 				var itemSource = config.itemSource;
 				var parameters = {};
 				parameters[itemSource.idKey] = id;
-				$('#single-page .content').html('<p class="loading">' + config.labels.loading.item + '</p>');
+				$page.find('.content').html('<p class="loading">' + config.labels.loading.item + '</p>');
 				$.getJSON(itemSource.url, parameters, function(data) {
 					for(key in itemSource.get) {
 						item[key] = data[key];
@@ -47,26 +49,8 @@
 
 		var display = function(item) {
 			var template = _.template(config.templates.single);
-			$('#single-page .content').html(template({item: item}));
+			$page.find('.content').html(template({item: item}));
 		}
-
-		var viewMap = function() {
-			var $page = $('#single-page');
-			if(!$page.hasClass('toggled'))
-				$('#single-page').addClass('toggled');
-			else
-				$('#single-page').removeClass('toggled');
-		}
-
-		$('#single-page .close').click(function() {
-			app.closeItem();
-			return false;
-		});
-
-		$('#single-page .view-map').click(function() {
-			viewMap();
-			return false;
-		});
 
 	}
 
@@ -305,8 +289,25 @@
 
 		_itemListUpdate(items);
 
-		var $singlePage = '<div id="single-page"><div class="actions"><p class="close">' + config.labels.close + '</p><p class="view-map">' + config.labels.view_map + '</p></div><div class="content"></div></div>';
-		app.$.append($singlePage);
+		var $page = $('<div id="single-page"><div class="actions"><p class="close">' + config.labels.close + '</p><p class="view-map">' + config.labels.view_map + '</p></div><div class="content"></div></div>');
+		app.$.append($page);
+
+		var viewMap = function() {
+			if(!$page.hasClass('toggled'))
+				$page.addClass('toggled');
+			else
+				$page.removeClass('toggled');
+		}
+
+		$page.find('.close').click(function() {
+			app.closeItem();
+			return false;
+		});
+
+		$page.find('.view-map').click(function() {
+			viewMap();
+			return false;
+		});
 	}
 
 	var _itemListUpdate = function(items) {
