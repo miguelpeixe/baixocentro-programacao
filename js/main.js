@@ -111,7 +111,10 @@
 		for(key in unique) {
 			filteredData.push(unique[key]);
 		}
-		_markers(filteredData);
+
+		if(config.map)
+			_markers(filteredData);
+
 		_itemListUpdate(filteredData);
 	}
 
@@ -158,7 +161,8 @@
 			app.$.append($content);
 			app.map.invalidateSize(true); //reset map size
 			app.data = data; // store data
-			_markers(data);
+			if(config.map)
+				_markers(data);
 			if(config.filters)
 				_filters();
 			_itemList(data);
@@ -274,7 +278,7 @@
 
 		_itemListUpdate(items);
 
-		var $singlePage = '<div id="single-page"><div class="actions"><p class="close">' + config.labels.close + '</p><p class="view-map">' + config.labels.view_map + '</p></div><div class="content"></div>div>';
+		var $singlePage = '<div id="single-page"><div class="actions"><p class="close">' + config.labels.close + '</p><p class="view-map">' + config.labels.view_map + '</p></div><div class="content"></div></div>';
 		app.$.append($singlePage);
 	}
 
@@ -336,23 +340,22 @@
 
 	var _readFragments = function() {
 
-		var filtering = app.filteringVals;
+		if(config.filters) {
+			var filtering = app.filteringVals;
+			_.each(config.filters, function(filter, i) {
+				if(fragment.get(filter.name)) {
+					var val = fragment.get(filter.name);
+					if(val.indexOf('|') != -1)
+						val = val.split('|');
+					var $input = $('.filter #' + filter.name);
+					$input.val(val);
+					if($input.is('select'))
+						$input.trigger('liszt:updated');
+					filtering[filter.name] = val;
+				}
+			});
+		}
 
-		_.each(config.filters, function(filter, i) {
-			if(fragment.get(filter.name)) {
-				var val = fragment.get(filter.name);
-				if(val.indexOf('|') != -1)
-					val = val.split('|');
-
-				var $input = $('.filter #' + filter.name);
-
-				$input.val(val);
-				if($input.is('select'))
-					$input.trigger('liszt:updated');
-
-				filtering[filter.name] = val;
-			}
-		});
 		if(fragment.get('p')) {
 			app.openItem(fragment.get('p'));
 		}
