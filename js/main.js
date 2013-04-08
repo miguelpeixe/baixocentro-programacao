@@ -18,7 +18,6 @@
 
 		var item = _.find(app.data, function(item) { return item.id == id; });
 		if(item) {
-		
 			var lat = item[config.dataRef.lat];
 			var lng = item[config.dataRef.lng];
 			var map = app.map;
@@ -155,6 +154,15 @@
 			maxZoom: config.map.maxZoom
 		}).addTo(map);
 		map.markersGroup = L.layerGroup().addTo(map);
+		
+		//adding template icons
+		if(config.templates.icons) {
+			var LeafIcon = L.Icon.extend({});
+			config.templates.icons_ready = {}
+			$.each(config.templates.icons, function(index, icon){
+				config.templates.icons_ready[icon] = new LeafIcon({iconUrl: 'icons/'+icon+'.png'});
+			});
+		}
 	}
 
 	var _data = function() {
@@ -180,8 +188,11 @@
 			var lat = item[config.dataRef.lat];
 			var lng = item[config.dataRef.lng];
 			if(lat && lng) {
+				//hackish way of randomize icons
+				var i = config.templates.icons.sort( function() { return 0.5 - Math.random() })[0];
+				var icon = config.templates.icons_ready[i];
 				var template = _.template(config.templates.marker);
-				var marker = L.marker([lat, lng]).bindPopup(template({item: item}));
+				var marker = L.marker([lat, lng], {icon: icon}).bindPopup(template({item: item}));
 				marker.on('mouseover', function(e) {
 					e.target.openPopup();
 				});
