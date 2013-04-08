@@ -2,6 +2,13 @@ var programacao = {};
 
 programacao.config = {
 	dataSource: 'projects.php',
+	singleSource: {
+		url: 'projects.php',
+		id: 'id',
+		get: {
+			desc: 'desc'
+		}
+	},
 	dataRef: {
 		id: 'id',
 		lat: 'lat',
@@ -50,7 +57,7 @@ programacao.config = {
 	},
 	templates: {
 		list: '<p class="category"><%= item.cat %></p><h3><%= item.nome %></h3>',
-		single: '<p class="cat"><%= item.cat %></p><h2><%= item.nome %></h2><h3><%= item.data %></h3><h3><%= item.hora %></h3><p class="local">Local: <span><%= item.local %></span></p>',
+		single: '<p class="cat"><%= item.cat %></p><h2><%= item.nome %></h2><h3><%= item.data %></h3><h3><%= item.hora %></h3><p class="local">Local: <span><%= item.local %></span></p><p><%= item.desc %></p>',
 		marker: '<p class="meta"><span class="cat"><%= item.cat %></span></p><h2><%= item.nome %></h2><p class="meta"><span class="data"><%= item.data %></span> <span class="time"><%= item.hora %></span></p>'
 	}
 }

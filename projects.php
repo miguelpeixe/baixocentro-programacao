@@ -1,11 +1,13 @@
 <?php
-if(isset($_GET['p'])) {
+if(isset($_GET['id'])) {
 	// retrieve single project
-	$output = array();
+	$project = json_decode(file_get_contents('http://www.texugo.com.br/bxc2013/mapa!projeto.action?codProjeto=' . $_GET['id']), true);
+	$output = $project['values'];
+	$output['data'] = fixDate($output['data']);
 } else {
 	// retrieve all projects
-	$activities = json_decode(file_get_contents('http://www.texugo.com.br/bxc2013/mapa!pins.action'), true);
-	$output = $activities['values'];
+	$projects = json_decode(file_get_contents('http://www.texugo.com.br/bxc2013/mapa!pins.action'), true);
+	$output = $projects['values'];
 	// fix date
 	foreach($output as &$item) {
 		error_log($item['data']);

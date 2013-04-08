@@ -6,8 +6,29 @@
 	programacao.filteringVals = {};
 
 	programacao.open = function(id) {
+
+		$('#single-page .content').empty();
+		$('#single-page').show();
+
 		var item = _.find(programacao.data, function(item) { return item.id == id; });
 		if(item) {
+			if(config.singleSource && config.singleSource.url) {
+				var singleSource = config.singleSource;
+				var parameters = {};
+				parameters[singleSource.id] = id;
+				$('#single-page .content').html('<p class="loading">Carregando...</p>');
+				$.getJSON(singleSource.url, parameters, function(data) {
+					for(key in singleSource.get) {
+						item[key] = data[key];
+					}
+					display(item);
+				});
+			} else {
+				display(item);
+			}
+		}
+
+		function display(item) {
 			var lat = item[config.dataRef.lat];
 			var lng = item[config.dataRef.lng];
 			if(lat && lng)
@@ -18,7 +39,6 @@
 			var template = _.template(config.templates.single);
 			$('#single-page .content').html(template({item: item}));
 			$('#single-page').removeClass('toggled');
-			$('#single-page').show();
 			fragment.set({'p': item.id});
 		}
 	}

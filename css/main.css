@@ -257,6 +257,13 @@ h1,h2,h3,h4 {
 	-moz-transition: all .2s ease-in-out;
 }
 
+#single-page .loading {
+	font-size: 20px;
+	margin-top: 30%;
+	color: #f0f0f0;
+	text-align: center;
+}
+
 #single-page .content {
 	overflow: auto;
 	top: 15%;
