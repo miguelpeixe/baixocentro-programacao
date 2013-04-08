@@ -24,8 +24,6 @@ function fixDate($date) {
 	$date = str_replace('/2024', '', $date);
 	$date = str_replace('/2012', '', $date);
 
-	error_log($date);
-
 	// add 0 prefix to 1 length day/month
 	$separatedVals = explode('/', $date);
 	if($separatedVals) {
