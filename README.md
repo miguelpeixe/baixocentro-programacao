@@ -1,4 +1,4 @@
-baixocentro-programacao
-=======================
+Programação BaixoCentro 2013
+============================
 
-Mapa da programação do BaixoCentro
+Visualização mapeada e com filtros da programação do BaixoCentro 2013.
