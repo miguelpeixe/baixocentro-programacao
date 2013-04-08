@@ -156,7 +156,6 @@ h1,h2,h3,h4 {
 #content #filters .chzn-container {
 	margin-bottom: 10px !important;
 	width: 100% !important;
-	height: 38px !important;
 }
 
 #content #filters .search-field input {
@@ -200,9 +199,9 @@ h1,h2,h3,h4 {
 
 #content #list {
 	position: absolute;
-	top: 325px;
 	overflow: auto;
-	bottom: 0;
+	top: 20px;
+	bottom: 20px;
 	left: 20px;
 	right: 20px;
 }

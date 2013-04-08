@@ -289,6 +289,14 @@
 				return false;
 			}
 		});
+
+		var _updateHeight = function() {
+			var top = $('#content .inner').height() + 20;
+			app.$.find('#list').css({top: top});
+		}
+
+		_updateHeight();
+
 	}
 
 	var _fragment = function() {
