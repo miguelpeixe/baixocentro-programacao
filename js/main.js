@@ -79,8 +79,8 @@
 
 		var filteredData = app.data;
 
-		if(options instanceof Object) {
-			_.each(config.filters, function(filter, i) {
+		_.each(config.filters, function(filter, i) {
+			if(options instanceof Object) {
 				var filtering = options[filter.name];
 				if(filtering) {
 					var fragmentData = {};
@@ -99,8 +99,10 @@
 				} else {
 					fragment.rm(filter.name);
 				}
-			});
-		}
+			} else {
+				fragment.rm(filter.name);
+			}
+		});
 
 		// prevent duplicates
 		var unique = {};
@@ -256,25 +258,26 @@
 				var template = _.template('<select id="' + filter.name + '" data-placeholder="' + filter.title + '" class="chzn-select" ' + multipleAttr + '><% _.each(vals, function(val, i) { %><option></option><option value="<%= val %>"><%= val %></option><% }); %></select>');
 				$filtersContainer.find('.filter.' + filter.name).html(template({vals: filterVals}));
 
-				/* bind events */
-
-				$('select#' + filter.name).change(function() {
+				app.$.find('select#' + filter.name).change(function() {
 					filtering[filter.name] = $(this).val();
 					app.filter(filtering);
 				});
 			}
 		});
+
 		$('.chzn-select').chosen({
 			allow_single_deselect: true
 		});
 
-		/* bind events */
-		$filtersContainer.find('.clear-search').click(function() {
+		app.$.find('.clear-search').click(function() {
+			filtering = {};
 			_.each(config.filters, function(filter, i) {
-				if(filter.type == 'text')
-					$('input#' + filter.name).val('');
-				else if(filter.type == 'multiple-select')
-					$('input#' + filter.name).val('').trigger('liszt:updated');
+				var $field = app.$.find('.filter #' + filter.name);
+				$field.val('');
+				if(filter.type == 'multiple-select')
+					$field.val([]);
+				if(filter.type == 'multiple-select' || filter.type == 'select')
+					$field.trigger("liszt:updated");
 			});
 			app.filter();
 			return false;
