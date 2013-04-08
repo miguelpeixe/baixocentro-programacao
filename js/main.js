@@ -1,22 +1,37 @@
 (function($) {
 
-	var config = programacao.config;
+	var app = programacao;
+	var config = app.config;
 
-	programacao._data = {};
-	programacao.filteringVals = {};
+	app._data = {};
+	app.filteringVals = {};
 
-	programacao.open = function(id) {
+	app.start = function(containerID) {
+		app.containerID = containerID;
+		_start(containerID);
+	};
+
+	app.openItem = function(id) {
 
 		$('#single-page .content').empty();
 		$('#single-page').show();
 
-		var item = _.find(programacao.data, function(item) { return item.id == id; });
+		var item = _.find(app.data, function(item) { return item.id == id; });
 		if(item) {
+		
+			var lat = item[config.dataRef.lat];
+			var lng = item[config.dataRef.lng];
+			var map = app.map;
+			if(lat && lng)
+				map.setView([lat, lng], config.map.maxZoom);
+			else
+				map.setView(config.map.center, config.map.zoom);
+
 			if(config.singleSource && config.singleSource.url) {
 				var singleSource = config.singleSource;
 				var parameters = {};
 				parameters[singleSource.id] = id;
-				$('#single-page .content').html('<p class="loading">Carregando...</p>');
+				$('#single-page .content').html('<p class="loading">' + config.labels.loading.item + '</p>');
 				$.getJSON(singleSource.url, parameters, function(data) {
 					for(key in singleSource.get) {
 						item[key] = data[key];
@@ -27,31 +42,42 @@
 				display(item);
 			}
 		}
+		$('#single-page .close').click(function() {
+			app.closeItem();
+			return false;
+		});
+
+		$('#single-page .view-map').click(function() {
+			viewMap();
+			return false;
+		});
 
 		function display(item) {
-			var lat = item[config.dataRef.lat];
-			var lng = item[config.dataRef.lng];
-			if(lat && lng)
-				programacao.map.setView([lat, lng], config.map.maxZoom);
-			else
-				programacao.map.setView(config.map.center, config.map.zoom)
-
 			var template = _.template(config.templates.single);
 			$('#single-page .content').html(template({item: item}));
 			$('#single-page').removeClass('toggled');
 			fragment.set({'p': item.id});
 		}
+
+		function viewMap() {
+			var $page = $('#single-page');
+			if(!$page.hasClass('toggled'))
+				$('#single-page').addClass('toggled');
+			else
+				$('#single-page').removeClass('toggled');
+		}
+
 	}
 
-	programacao.close = function() {
+	app.closeItem = function() {
 		fragment.rm('p');
 		$('#single-page').hide();
-		programacao.map.setView(config.map.center, config.map.zoom);
+		app.map.setView(config.map.center, config.map.zoom);
 	}
 
-	programacao.filter = function(options) {
+	app.filter = function(options) {
 
-		var filteredData = programacao.data;
+		var filteredData = app.data;
 
 		if(options instanceof Object) {
 			_.each(config.filters, function(filter, i) {
@@ -85,60 +111,39 @@
 		for(key in unique) {
 			filteredData.push(unique[key]);
 		}
-
-		_buildMarkers(filteredData);
-		_buildItemList(filteredData);
+		_markers(filteredData);
+		_itemListUpdate(filteredData);
 	}
 
-	$(document).ready(function() {
-		_buildMap();
-		_loadData();
-
-		$('.open-item').live('click', function() {
-			var id = $(this).data('itemid');
-			if(id) {
-				programacao.open(id);
-				return false;
-			}
-		});
-
-		$('#single-page .close').live('click', function() {
-			programacao.close();
-			return false;
-		});
-
-		$('#single-page .view-map').live('click', function() {
-			viewMap();
-			return false;
-		});
-
-		$('.clear-search').live('click', function() {
-			_.each(config.filters, function(filter, i) {
-				if(filter.type == 'text')
-					$('input#' + filter.name).val('');
-				else if(filter.type == 'multiple-select')
-					$('input#' + filter.name).val('').trigger('liszt:updated');
+	var _start = function() {
+		var $loading = $('<div id="loading">' + config.labels.loading.first + '</div>');
+		var $header = $('<div id="header" />');
+		$header.append($('<h1>' + config.labels.title + '</h1>' + '<h2>' + config.labels.subtitle + '</h2>'));
+		if(config.nav) {
+			$nav = $('<div class="nav" />');
+			_.each(config.nav, function(item, i) {
+				$nav.append('<a href="' + item.url + '" target="_blank" rel="external">' + item.title + '</a>');
 			});
-			programacao.filter();
-			return false;
-		});
+			$header.append($nav);
+		}
+		$(document).ready(function() {
 
-	});
+			app.$ = $('#' + app.containerID);
+			app.$.append($loading);
+			app.$.append($header);
 
-	function _loadData() {
-		$.getJSON(programacao.config.dataSource, function(data) {
-			programacao.map.invalidateSize(true); //reset map size
-			programacao.data = data; // store data
-			_buildMarkers(data);
-			_buildItemList(data);
-			_buildFilters();
-			_readFragments();
-			$('#loading').hide();
+			if(config.map)
+				_map();
+			if(config.dataSource)
+				_data();
+
 		});
 	}
 
-	function _buildMap() {
-		var map = programacao.map = L.map('map');
+	var _map = function() {
+		var $map = $('<div class="map-container"><div id="map"></div></div>');
+		app.$.append($map);
+		var map = app.map = L.map('map');
 		if(!fragment.get('p'))
 			map.setView(config.map.center, config.map.zoom);
 		L.tileLayer(config.map.tiles, {
@@ -147,14 +152,29 @@
 		map.markersGroup = L.layerGroup().addTo(map);
 	}
 
-	function _buildMarkers(items) {
-		var map = programacao.map;
+	var _data = function() {
+		$.getJSON(config.dataSource, function(data) {
+			var $content = $('<div id="content"><div class="inner"></div></div>');
+			app.$.append($content);
+			app.map.invalidateSize(true); //reset map size
+			app.data = data; // store data
+			_markers(data);
+			if(config.filters)
+				_filters();
+			_itemList(data);
+			_readFragments();
+			$('#loading').hide();
+		});
+	}
+
+	var _markers = function(items) {
+		var map = app.map;
 		map.markersGroup.clearLayers();
 		_.each(items, function(item, i) {
-			var lat = item[programacao.config.dataRef.lat];
-			var lng = item[programacao.config.dataRef.lng];
+			var lat = item[config.dataRef.lat];
+			var lng = item[config.dataRef.lng];
 			if(lat && lng) {
-				var template = _.template(programacao.config.templates.marker);
+				var template = _.template(config.templates.marker);
 				var marker = L.marker([lat, lng]).bindPopup(template({item: item}));
 				marker.on('mouseover', function(e) {
 					e.target.openPopup();
@@ -163,7 +183,7 @@
 					e.target.closePopup();
 				});
 				marker.on('click', function(e) {
-					programacao.open(item[programacao.config.dataRef.id]);
+					app.openItem(item[config.dataRef.id]);
 					return false;
 				});
 				map.markersGroup.addLayer(marker);
@@ -171,11 +191,25 @@
 		});
 	}
 
-	function _buildFilters() {
-		var $filtersContainer = $(config.containers.filters);
+	var _filters = function() {
+
+		var $filters = $('<div id="filters" class="clearfix"><p class="clear-search">' + config.labels.clear_search + '</p><h3>' + config.labels.filters + '</h3><div class="filters-container"></div></div>');
+		app.$.find('#content .inner').append($filters);
+		var $filtersContainer = app.$.find('#filters .filters-container');
 		var filters = config.filters;
-		var filtering = programacao.filteringVals;
-		var data = programacao.data;
+		var filtering = app.filteringVals;
+		var data = app.data;
+
+		var _storeFilter = function(group, val, filter) {
+			if(filter.exclude && filter.exclude.length) {
+				if(_.find(filter.exclude, function(exclude) { return exclude == val; }))
+					return group;
+			}
+			if(!_.contains(group, val))
+				group.push(val);
+			return group;
+		}
+
 		_.each(filters, function(filter, i) {
 
 			$filtersContainer.append('<div class="' + filter.name + ' filter"></div>');
@@ -187,7 +221,7 @@
 
 				$('input#' + filter.name).bind('keyup', function(e) {
 					filtering[filter.name] = $(this).val();
-					programacao.filter(filtering);
+					app.filter(filtering);
 					if(e.keyCode == 13)
 						return false;
 				});
@@ -195,48 +229,69 @@
 			} else if(filter.type == 'multiple-select') {
 
 				// populate filter
-				var filterVals = programacao._data[filter.name] = [];
+				var filterVals = app._data[filter.name] = [];
 				_.each(data, function(item, i) {
 					var filterVal = item[filter.sourceRef];
 					if(filter.name == 'date' || filter.name == 'time') {
 						filterVal = filterVal.split(',');
 						_.each(filterVal, function(v, i) {
-							if(!_.contains(filterVals, v))
-								filterVals.push(v);
+							filterVals = _storeFilter(filterVals, v, filter);
 						});
 					} else {
-						if(!_.contains(filterVals, filterVal))
-							filterVals.push(filterVal);
+						filterVals = _storeFilter(filterVals, filterVal, filter);
 					}
+					filterVals = _.sortBy(filterVals, function(val) { return val; });
 				});
 				var template = _.template('<select id="' + filter.name + '" data-placeholder="' + filter.title + '" class="chzn-select" multiple><% _.each(vals, function(val, i) { %><option value="<%= val %>"><%= val %></option><% }); %></select>');
 				$filtersContainer.find('.filter.' + filter.name).html(template({vals: filterVals}));
 
 				/* bind events */
 
-				$('select#' + filter.name).live('change', function() {
+				$('select#' + filter.name).change(function() {
 					filtering[filter.name] = $(this).val();
-					programacao.filter(filtering);
+					app.filter(filtering);
 				});
 			}
 		});
 		$('.chzn-select').chosen();
+
+		/* bind events */
+		$filtersContainer.find('.clear-search').click(function() {
+			_.each(config.filters, function(filter, i) {
+				if(filter.type == 'text')
+					$('input#' + filter.name).val('');
+				else if(filter.type == 'multiple-select')
+					$('input#' + filter.name).val('').trigger('liszt:updated');
+			});
+			app.filter();
+			return false;
+		});
 	}
 
-	function _buildItemList(items) {
+	var _itemList = function(items) {
+		var $itemList = '<h3>' + config.labels.results + '</h3><div id="list"></div>';
+		app.$.find('#content .inner').append($itemList);
+
+		_itemListUpdate(items);
+
+		var $singlePage = '<div id="single-page"><div class="actions"><p class="close">' + config.labels.close + '</p><p class="view-map">' + config.labels.view_map + '</p></div><div class="content"></div>div>';
+		app.$.append($singlePage);
+	}
+
+	var _itemListUpdate = function(items) {
 		var template = _.template('<ul><% _.each(items, function(item, i) { %><li class="open-item" data-itemid="<%= item.id %>">' + config.templates.list + '</li><% }); %></ul>');
 		$('#list').html(template({items: items}));
+
+		$('#list').find('.open-item').click(function() {
+			var id = $(this).data('itemid');
+			if(id) {
+				app.openItem(id);
+				return false;
+			}
+		});
 	}
 
-	function viewMap() {
-		var $page = $('#single-page');
-		if(!$page.hasClass('toggled'))
-			$('#single-page').addClass('toggled');
-		else
-			$('#single-page').removeClass('toggled');
-	}
-
-	var Fragment = function() {
+	var _fragment = function() {
 		var f = {};
 		var _set = function(query) {
 			var hash = [];
@@ -269,9 +324,11 @@
 		return f;
 	};
 
-	function _readFragments() {
+	var fragment = _fragment();
 
-		var filtering = programacao.filteringVals;
+	var _readFragments = function() {
+
+		var filtering = app.filteringVals;
 
 		_.each(config.filters, function(filter, i) {
 			if(fragment.get(filter.name)) {
@@ -289,12 +346,10 @@
 			}
 		});
 		if(fragment.get('p')) {
-			programacao.open(fragment.get('p'));
+			app.openItem(fragment.get('p'));
 		}
 
-		programacao.filter(filtering);
+		app.filter(filtering);
 	}
-
-	var fragment = Fragment();
 
 })(jQuery);

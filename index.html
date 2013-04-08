@@ -8,8 +8,8 @@
 	<script type="text/javascript" src="lib/leaflet.markercluster.js"></script>
 	<script type="text/javascript" src="lib/underscore-min.js"></script>
 	<script type="text/javascript" src="lib/chosen.jquery.min.js"></script>
-	<script type="text/javascript" src="config.js?v=2"></script>
-	<script type="text/javascript" src="js/main.js"></script>
+	<script type="text/javascript" src="config.js?v=3"></script>
+	<script type="text/javascript" src="js/main.js?v=2"></script>
 	<link rel="stylesheet" href="css/base.css" />
 	<link rel="stylesheet" href="css/skeleton.css" />
 	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
@@ -21,38 +21,9 @@
 	<link rel="stylesheet" href="lib/chosen.css" />
 </head>
 <body>
-	<div id="loading">Carregando projetos...</div>
-	<div id="header">
-		<h1>BaixoCentro</h1>
-		<h2>//Programação2013</h2>
-		<div class="nav">
-			<a href="http://baixocentro.org/" rel="external" target="_blank">Site oficial</a>
-			<a href="http://muro.baixocentro.org/" rel="external" target="_blank">Cobertura colaborativa</a>
-		</div>
-	</div>
-	<div class="map-container">
-		<div id="map"></div>
-	</div>
-	<div id="content">
-		<div class="inner">
-			<div id="filters" class="clearfix">
-				<p class="clear-search">Limpar busca</p>
-				<h3>Filtros</h3>
-				<div class="filters-container">
-				</div>
-			</div>
-			<h3>Resultados</h3>
-			<div id="list">
-			</div>
-		</div>
-	</div>
-	<div id="single-page">
-		<div class="actions">
-			<p class="close">Fechar</p>
-			<p class="view-map">Ver mapa</p>
-		</div>
-		<div class="content">
-		</div>
-	</div>
+	<div id="app"></div>
+	<script type="text/javascript">
+		programacao.start('app');
+	</script>
 </body>
 </html>
