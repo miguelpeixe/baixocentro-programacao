@@ -27,13 +27,13 @@
 			else
 				map.setView(config.map.center, config.map.zoom);
 
-			if(config.singleSource && config.singleSource.url) {
-				var singleSource = config.singleSource;
+			if(config.itemSource && config.itemSource.url) {
+				var itemSource = config.itemSource;
 				var parameters = {};
-				parameters[singleSource.id] = id;
+				parameters[itemSource.idKey] = id;
 				$('#single-page .content').html('<p class="loading">' + config.labels.loading.item + '</p>');
-				$.getJSON(singleSource.url, parameters, function(data) {
-					for(key in singleSource.get) {
+				$.getJSON(itemSource.url, parameters, function(data) {
+					for(key in itemSource.get) {
 						item[key] = data[key];
 					}
 					display(item);
@@ -85,7 +85,7 @@
 				if(filtering) {
 					var fragmentData = {};
 					if(typeof filtering === 'string') {
-						filteredData = _.filter(filteredData, function(item) { return item[filter.sourceRef].toLowerCase().indexOf(filtering.toLowerCase()) != -1; });
+						filteredData = _.filter(filteredData, function(item) { if(item[filter.sourceRef]) return item[filter.sourceRef].toLowerCase().indexOf(filtering.toLowerCase()) != -1; });
 						fragmentData[filter.name] = filtering;
 					} else if(filtering instanceof Array) {
 						var optionsFiltered = [];
@@ -230,23 +230,30 @@
 						return false;
 				});
 
-			} else if(filter.type == 'multiple-select') {
+			} else if(filter.type == 'multiple-select' || filter.type == 'select') {
 
 				// populate filter
 				var filterVals = app._data[filter.name] = [];
-				_.each(data, function(item, i) {
-					var filterVal = item[filter.sourceRef];
-					if(filter.name == 'date' || filter.name == 'time') {
-						filterVal = filterVal.split(',');
-						_.each(filterVal, function(v, i) {
-							filterVals = _storeFilter(filterVals, v, filter);
-						});
-					} else {
-						filterVals = _storeFilter(filterVals, filterVal, filter);
-					}
-					filterVals = _.sortBy(filterVals, function(val) { return val; });
-				});
-				var template = _.template('<select id="' + filter.name + '" data-placeholder="' + filter.title + '" class="chzn-select" multiple><% _.each(vals, function(val, i) { %><option value="<%= val %>"><%= val %></option><% }); %></select>');
+				if(filter.values) {
+					filterVals = filter.values;
+				} else {
+					_.each(data, function(item, i) {
+						var filterVal = item[filter.sourceRef];
+						if(filter.split) {
+							filterVal = filterVal.split(filter.split);
+							_.each(filterVal, function(v, i) {
+								filterVals = _storeFilter(filterVals, v, filter);
+							});
+						} else {
+							filterVals = _storeFilter(filterVals, filterVal, filter);
+						}
+						filterVals = _.sortBy(filterVals, function(val) { return val; });
+					});
+				}
+				var multipleAttr = '';
+				if(filter.type == 'multiple-select')
+					multipleAttr = 'multiple';
+				var template = _.template('<select id="' + filter.name + '" data-placeholder="' + filter.title + '" class="chzn-select" ' + multipleAttr + '><% _.each(vals, function(val, i) { %><option></option><option value="<%= val %>"><%= val %></option><% }); %></select>');
 				$filtersContainer.find('.filter.' + filter.name).html(template({vals: filterVals}));
 
 				/* bind events */
@@ -257,7 +264,9 @@
 				});
 			}
 		});
-		$('.chzn-select').chosen();
+		$('.chzn-select').chosen({
+			allow_single_deselect: true
+		});
 
 		/* bind events */
 		$filtersContainer.find('.clear-search').click(function() {
