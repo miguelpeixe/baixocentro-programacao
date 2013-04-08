@@ -13,7 +13,10 @@
 
 	app.openItem = function(id) {
 
+		fragment.set({'p': item.id});
+	
 		$('#single-page .content').empty();
+		$('#single-page').removeClass('toggled');
 		$('#single-page').show();
 
 		var item = _.find(app.data, function(item) { return item.id == id; });
@@ -45,8 +48,6 @@
 		var display = function(item) {
 			var template = _.template(config.templates.single);
 			$('#single-page .content').html(template({item: item}));
-			$('#single-page').removeClass('toggled');
-			fragment.set({'p': item.id});
 		}
 
 		var viewMap = function() {
@@ -56,7 +57,7 @@
 			else
 				$('#single-page').removeClass('toggled');
 		}
-		
+
 		$('#single-page .close').click(function() {
 			app.closeItem();
 			return false;
