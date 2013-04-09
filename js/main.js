@@ -140,6 +140,7 @@
 				if(!data || !data.length) {
 					$('#loading').text(config.labels.loading.error);
 				} else {
+					$('body').removeClass('loading');
 					var $content = $('<div id="content"><div class="inner"></div></div>');
 					app.$.append($content);
 					app.map.invalidateSize(true); //reset map size
@@ -150,7 +151,6 @@
 						_filters();
 					_itemList(data);
 					_readFragments();
-					$('body').removeClass('loading');
 					$('#loading').hide();
 				}
 			},

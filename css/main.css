@@ -129,6 +129,7 @@ h1,h2,h3,h4 {
 	-webkit-transition: width .2s ease-in-out;
 	-moz-transition: width .2s ease-in-out;
 	transition: width .2s ease-in-out;
+	overflow: hidden;
 }
 
 #content .inner {
@@ -176,6 +177,10 @@ h1,h2,h3,h4 {
 
 #content #filters .chzn-container {
 	margin-bottom: 10px !important;
+	width: 100% !important;
+}
+
+#content #filters .chzn-drop {
 	width: 100% !important;
 }
 
