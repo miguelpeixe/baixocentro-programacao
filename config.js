@@ -103,14 +103,18 @@ config.filters = [
 			'12/04',
 			'13/04',
 			'14/04'
-		]
+		],
+		dataType: 'date',
+		dateFormat: 'DD/MM'
 	},
 	{
 		name: 'time',
 		sourceRef: 'hora',
 		type: 'multiple-select',
 		split: ',',
-		title: 'Horários'
+		title: 'Horários',
+		dataType: 'date',
+		dateFormat: 'HH:mm'
 	},
 	{
 		name: 'place',

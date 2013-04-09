@@ -218,13 +218,55 @@
 		var data = app.data;
 
 		var _storeFilter = function(group, val, filter) {
+
+			v = {};
+
+			if(!val)
+				return group;
+
+			v[val] = val;
+
 			if(filter.exclude && filter.exclude.length) {
 				if(_.find(filter.exclude, function(exclude) { return exclude == val; }))
 					return group;
 			}
-			if(!_.contains(group, val))
-				group.push(val);
+			// format date
+			if(filter.dataType == 'date') {
+				var date = moment(val, filter.dateFormat);
+				if(date && date.isValid()) {
+					if(!filter.dateOutputFormat) {
+						v[val] = date.format(filter.dateFormat);
+					} else if(filter.dateOutputFormat == 'fromnow') {
+						if(!date.year()) {
+							date.year(moment().format('YYYY'));
+						}
+						if(!date.month()) {
+							date.month(moment().format('MM'));
+						}
+						if(!date.day()) {
+							date.day(moment().format('DD'));
+						}
+						if(!date.hour()) {
+							date.hour(moment().format('HH'));
+						}
+						if(!date.minute()) {
+							date.minute(moment().format('mm'));
+						}
+						v[val] = date.fromNow();
+					} else {
+						v[val] = date.format(filter.dateOutputFormat);
+					}
+				} else {
+					return group;
+				}
+			}
+
+			if(!_.any(group, function(item) { return _.isEqual(item, v); })) {
+				group.push(v);
+			}
+
 			return group;
+
 		}
 
 		_.each(filters, function(filter, i) {
@@ -248,7 +290,9 @@
 				// populate filter
 				var filterVals = app._data[filter.name] = [];
 				if(filter.values) {
-					filterVals = filter.values;
+					_.each(filter.values, function(filterVal, i) {
+						filterVals = _storeFilter(filterVals, filterVal, filter);
+					});
 				} else {
 					_.each(data, function(item, i) {
 						var filterVal = item[filter.sourceRef];
@@ -262,14 +306,17 @@
 						} else {
 							filterVals = _storeFilter(filterVals, filterVal, filter);
 						}
-						filterVals = _.sortBy(filterVals, function(val) { return val; });
+						filterVals = _.sortBy(filterVals, function(val) { return val[_.keys(val)[0]]; });
 					});
 				}
 				var multipleAttr = '';
 				if(filter.type == 'multiple-select')
 					multipleAttr = 'multiple';
-				var template = _.template('<select id="' + filter.name + '" data-placeholder="' + filter.title + '" class="chzn-select" ' + multipleAttr + '><% _.each(vals, function(val, i) { %><option></option><option value="<%= val %>"><%= val %></option><% }); %></select>');
-				$filtersContainer.find('.filter.' + filter.name).html(template({vals: filterVals}));
+				var $select = $('<select id="' + filter.name + '" data-placeholder="' + filter.title + '" class="chzn-select" ' + multipleAttr + '><option></option></select>');
+				_.each(filterVals, function(val, i) { 
+					$select.append('<option value="' + _.keys(val)[0] + '">' + val[_.keys(val)[0]] + '</option><% }); %>');
+				});
+				$filtersContainer.find('.filter.' + filter.name).html($select);
 
 				app.$.find('select#' + filter.name).change(function() {
 					filtering[filter.name] = $(this).val();
