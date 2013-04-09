@@ -1,18 +1,32 @@
 <?php
 if(isset($_GET['id'])) {
 	// retrieve single project
-	$project = json_decode(file_get_contents('http://www.texugo.com.br/bxc2013/mapa!projeto.action?codProjeto=' . $_GET['id']), true);
+	$data = file_get_contents('http://www.texugo.com.br/bxc2013/mapa!projeto.action?codProjeto=' . $_GET['id']);
+	if(!$data) {
+		output(false);
+		exit();
+	}
+	$project = json_decode($data, true);
 	$output = $project['values'];
 	$output['data'] = fixDate($output['data']);
+	output($output);
+	exit();
 } else {
 	// retrieve all projects
-	$projects = json_decode(file_get_contents('http://www.texugo.com.br/bxc2013/mapa!pins.action'), true);
+	$data = file_get_contents('http://www.texugo.com.br/bxc2013/mapa!pins.action');
+	if(!$data) {
+		output(false);
+		exit();
+	}
+	$projects = json_decode($data, true);
 	$output = $projects['values'];
 	// fix date
 	foreach($output as &$item) {
 		error_log($item['data']);
 		$item['data'] = fixDate($item['data']);
 	}
+	output($output);
+	exit();
 }
 
 function fixDate($date) {
@@ -37,7 +51,17 @@ function fixDate($date) {
 	return $date;
 }
 
-header('Content-type: application/json');
-echo json_encode($output);
-exit;
+function output($data) {
+	header('Content-type: application/json');
+	if($data) {
+		/* Browser caching */
+		$expires = 60 * 30; // 30 minutes of browser cache
+		header('Pragma: public');
+		header('Cache-Control: maxage=' . $expires);
+		header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
+		/* --------------- */
+	}
+	echo json_encode($data);
+	exit;
+}
 ?>

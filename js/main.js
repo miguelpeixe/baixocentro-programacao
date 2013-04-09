@@ -131,6 +131,7 @@
 	}
 
 	var _data = function() {
+		$('body').addClass('loading');
 		$.ajax({
 			url: config.dataSource,
 			dataType: 'json',
@@ -142,17 +143,22 @@
 		});
 
 		var callback = function(data) {
-			var $content = $('<div id="content"><div class="inner"></div></div>');
-			app.$.append($content);
-			app.map.invalidateSize(true); //reset map size
-			app.data = data; // store data
-			if(config.map)
-				_markers(data);
-			if(config.filters)
-				_filters();
-			_itemList(data);
-			_readFragments();
-			$('#loading').hide();
+			if(!data || !data.length) {
+				$('#loading').text(config.labels.loading.error);
+			} else {
+				var $content = $('<div id="content"><div class="inner"></div></div>');
+				app.$.append($content);
+				app.map.invalidateSize(true); //reset map size
+				app.data = data; // store data
+				if(config.map)
+					_markers(data);
+				if(config.filters)
+					_filters();
+				_itemList(data);
+				_readFragments();
+				$('body').removeClass('loading');
+				$('#loading').hide();
+			}
 		};
 	}
 

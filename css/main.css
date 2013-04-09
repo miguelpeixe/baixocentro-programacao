@@ -25,7 +25,7 @@ h1,h2,h3,h4 {
 	bottom: 0;
 	left: 0;
 	right: 0;
-	background: rgba(0,0,0,0.95);
+	background: rgba(0,0,0,0.9);
 	color: #fff;
 	font-size: 32px;
 	line-height: 32px;
@@ -35,6 +35,11 @@ h1,h2,h3,h4 {
 	box-sizing(border-box);
 	padding-left: 30%;
 	padding-right: 30%;
+	text-shadow: 3px 3px 1px #000;
+}
+
+.loading #header {
+	width: 100%;
 }
 
 #header {
@@ -43,6 +48,10 @@ h1,h2,h3,h4 {
 	height: 100px;
 	width: 70%;
 	background: #000;
+	z-index: 99999;
+	-webkit-transition: width .2s ease-in-out;
+	-moz-transition: width .2s ease-in-out;
+	transition: width .2s ease-in-out;
 }
 
 #header h1 {
@@ -51,8 +60,6 @@ h1,h2,h3,h4 {
 	line-height: 100px;
 	margin: 0 20px;
 	float: left;
-	position: relative;
-	z-index: 99999;
 }
 
 #header h2 {
@@ -63,8 +70,6 @@ h1,h2,h3,h4 {
 	color: #555;
 	text-transform: uppercase;
 	margin-top: 5px;
-	position: relative;
-	z-index: 99999;
 }
 
 #header .nav {
@@ -89,17 +94,28 @@ h1,h2,h3,h4 {
 	color: #fff;
 }
 
+.loading .map-container {
+	width: 100%;
+}
+
 .map-container {
 	position: absolute;
 	top: 100px;
 	bottom: 0;
 	left: 0;
 	width: 70%;
+	-webkit-transition: width .2s ease-in-out;
+	-moz-transition: width .2s ease-in-out;
+	transition: width .2s ease-in-out;
 }
 
 .map-container #map {
 	width: 100%;
 	height: 100%;
+}
+
+.loading #content {
+	width: 0px;
 }
 
 #content {
@@ -110,6 +126,9 @@ h1,h2,h3,h4 {
 	width: 30%;
 	background: #f0f0f0;
 	border-left: 10px solid #000;
+	-webkit-transition: width .2s ease-in-out;
+	-moz-transition: width .2s ease-in-out;
+	transition: width .2s ease-in-out;
 }
 
 #content .inner {
