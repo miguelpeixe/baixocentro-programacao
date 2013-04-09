@@ -136,29 +136,30 @@
 			url: config.dataSource,
 			dataType: 'json',
 			timeout: 8000, // 8 second timeout
-			success: callback,
+			success: function(data) {
+				if(!data || !data.length) {
+					$('#loading').text(config.labels.loading.error);
+				} else {
+					var $content = $('<div id="content"><div class="inner"></div></div>');
+					app.$.append($content);
+					app.map.invalidateSize(true); //reset map size
+					app.data = data; // store data
+					if(config.map)
+						_markers(data);
+					if(config.filters)
+						_filters();
+					_itemList(data);
+					_readFragments();
+					$('body').removeClass('loading');
+					$('#loading').hide();
+				}
+			},
 			error: function() {
 				$('#loading').text(config.labels.loading.error);
 			}
 		});
 
 		var callback = function(data) {
-			if(!data || !data.length) {
-				$('#loading').text(config.labels.loading.error);
-			} else {
-				var $content = $('<div id="content"><div class="inner"></div></div>');
-				app.$.append($content);
-				app.map.invalidateSize(true); //reset map size
-				app.data = data; // store data
-				if(config.map)
-					_markers(data);
-				if(config.filters)
-					_filters();
-				_itemList(data);
-				_readFragments();
-				$('body').removeClass('loading');
-				$('#loading').hide();
-			}
 		};
 	}
 
