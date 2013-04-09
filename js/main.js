@@ -131,7 +131,17 @@
 	}
 
 	var _data = function() {
-		$.getJSON(config.dataSource, function(data) {
+		$.ajax({
+			url: config.dataSource,
+			dataType: 'json',
+			timeout: 8000, // 8 second timeout
+			success: callback,
+			error: function() {
+				$('#loading').text(config.labels.loading.error);
+			}
+		});
+
+		var callback = function(data) {
 			var $content = $('<div id="content"><div class="inner"></div></div>');
 			app.$.append($content);
 			app.map.invalidateSize(true); //reset map size
@@ -143,7 +153,7 @@
 			_itemList(data);
 			_readFragments();
 			$('#loading').hide();
-		});
+		};
 	}
 
 	var _map = function() {

@@ -149,7 +149,8 @@ config.labels = {
 	view_map: 'Ver mapa',
 	loading: {
 		first: 'Carregando projetos...',
-		item: 'Carregando...'
+		item: 'Carregando...',
+		error: 'Ops, parece que o servidor de dados está fora do ar. Tente novamente.'
 	}
 };
 
