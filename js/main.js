@@ -155,9 +155,14 @@
 		L.tileLayer(config.map.tiles, {
 			maxZoom: config.map.maxZoom
 		}).addTo(map);
-		map.markersGroup = new L.MarkerClusterGroup()
-		map.markersGroup.addTo(map);
-		
+
+		if(config.map.markers.cluster)
+			map.markersGroup = new L.MarkerClusterGroup();
+		else
+			map.markersGroup = L.layerGroup();
+
+		map.addLayer(map.markersGroup);
+	
 		// create and store marker icons
 		if(config.map.markers && config.map.markers.icons.length) {
 			app._data.icons = [];
@@ -175,6 +180,7 @@
 			var lat = item[config.dataRef.lat];
 			var lng = item[config.dataRef.lng];
 			if(lat && lng) {
+				var LatLng = new L.LatLng(parseFloat(lat), parseFloat(lng));
 				var options = {};
 				// mouseover template
 				var template = _.template(config.templates.marker);
@@ -186,7 +192,7 @@
 					}
 				}
 				// create
-				var marker = L.marker([lat, lng], options).bindPopup(template({item: item}));
+				var marker = L.marker(LatLng, options).bindPopup(template({item: item}));
 				marker.on('mouseover', function(e) {
 					e.target.openPopup();
 				});
@@ -199,7 +205,7 @@
 				});
 				map.markersGroup.addLayer(marker);
 			}
-		});
+		});	
 	}
 
 	var _filters = function() {

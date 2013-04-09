@@ -26,6 +26,7 @@ config.map = {
  * Map markers settings
  */
 config.map.markers = {
+	cluster: false,
 	type: 'random',
 	icons: [
 		{
@@ -115,7 +116,10 @@ config.filters = [
 		name: 'place',
 		sourceRef: 'local',
 		type: 'multiple-select',
-		title: 'Locais'
+		title: 'Locais',
+		exclude: [
+			'Definir',
+		]
 	}
 ];
 
