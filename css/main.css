@@ -49,9 +49,6 @@ h1,h2,h3,h4 {
 	width: 70%;
 	background: #000;
 	z-index: 99999;
-	-webkit-transition: width .2s ease-in-out;
-	-moz-transition: width .2s ease-in-out;
-	transition: width .2s ease-in-out;
 }
 
 #header h1 {
@@ -104,9 +101,6 @@ h1,h2,h3,h4 {
 	bottom: 0;
 	left: 0;
 	width: 70%;
-	-webkit-transition: width .2s ease-in-out;
-	-moz-transition: width .2s ease-in-out;
-	transition: width .2s ease-in-out;
 }
 
 .map-container #map {
@@ -126,9 +120,6 @@ h1,h2,h3,h4 {
 	width: 30%;
 	background: #f0f0f0;
 	border-left: 10px solid #000;
-	-webkit-transition: width .2s ease-in-out;
-	-moz-transition: width .2s ease-in-out;
-	transition: width .2s ease-in-out;
 	overflow: hidden;
 }
 
