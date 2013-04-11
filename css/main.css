@@ -347,6 +347,14 @@ h1,h2,h3,h4 {
 	margin: 0;
 }
 
+#single-page img.thumbnail {
+	max-width: 50%;
+	max-height: 100%;
+	float: right;
+	margin: 35px 0 20px 20px;
+	border: 5px solid rgba(0,0,0,0.95);
+}
+
 #single-page p.cat {
 	margin: 10px 0;
 	font-size: 11px;
@@ -378,7 +386,8 @@ h1,h2,h3,h4 {
 #single-page .actions {
 	position: absolute;
 	top:15%;
-	right: 20%;
+	right: 15%;
+	margin-right: 20px;
 	text-transform: uppercase;
 	cursor: pointer;
 	font-size: 11px;
