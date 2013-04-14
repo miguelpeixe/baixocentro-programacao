@@ -61,7 +61,8 @@ function output($data) {
 		header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
 		/* --------------- */
 	}
-	echo json_encode($data);
+	$json = json_encode($data);
+	echo isset($_GET['callback']) ? "{$_GET['callback']}($json)" : $json;
 	exit;
 }
 ?>
